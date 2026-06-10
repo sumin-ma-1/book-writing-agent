@@ -1,0 +1,16 @@
+{
+  "title": "Mastering Python",
+  "description": "A comprehensive guide to Python programming for intermediate developers",
+  "chapters": [
+    {
+      "number": 1,
+      "title": "The Python Philosophy",
+      "description": "History of Python, the Zen of Python, and why Python's design choices matter"
+    },
+    {
+      "number": 2,
+      "title": "Advanced Data Structures",
+      "description": "Beyond lists and dicts: deques, namedtuples, defaultdict, Counter, and when to use each"
+    }
+  ]
+}
