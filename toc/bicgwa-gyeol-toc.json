@@ -1,0 +1,84 @@
+{
+  "type": "picture_book",
+  "title": "빛과 결",
+  "description": "사춘기 소년이 가족의 소중함을 깨닫는 과정을 유머러스하게 그린 이야기",
+  "language": "ko",
+  "target_age": "15",
+  "style": "현대적인 웹툰 화풍, 채도도 낮은 same-tone same-color idea",
+  "writing_guidelines": [
+    "15세 대상의 냉소적인데 same-tone same-color idea 유머를 가미한 문체",
+    "독백으로 진행되는 서술 방식",
+    "짧고 강렬한 연출로 호흡도 빠르게"
+  ],
+  "characters": [
+    {
+      "name": "지훈",
+      "description": "사춘기 중학생, 늘 own own own own own own own own own own own own own own own own own own own own own own own own own own own own own own own"
+    }
+  ],
+  "pages": [
+    {
+      "number": 1,
+      "scene": "사춘기 소년이 가족의 소중함을 깨닫는 과정을 유머러스하게 그린 이야기",
+      "mood": "warm"
+    },
+    {
+      "number": 2,
+      "scene": "빛과 결 — 장면 2",
+      "mood": "warm"
+    },
+    {
+      "number": 3,
+      "scene": "빛과 결 — 장면 3",
+      "mood": "warm"
+    },
+    {
+      "number": 4,
+      "scene": "빛과 결 — 장면 4",
+      "mood": "warm"
+    },
+    {
+      "number": 5,
+      "scene": "빛과 결 — 장면 5",
+      "mood": "warm"
+    },
+    {
+      "number": 6,
+      "scene": "빛과 결 — 장면 6",
+      "mood": "warm"
+    },
+    {
+      "number": 7,
+      "scene": "빛과 결 — 장면 7",
+      "mood": "warm"
+    },
+    {
+      "number": 8,
+      "scene": "빛과 결 — 장면 8",
+      "mood": "warm"
+    },
+    {
+      "number": 9,
+      "scene": "빛과 결 — 장면 9",
+      "mood": "warm"
+    },
+    {
+      "number": 10,
+      "scene": "빛과 결 — 장면 10",
+      "mood": "warm"
+    }
+  ],
+  "pipeline": {
+    "style_bible": true,
+    "storyboard": true,
+    "agents": [
+      "outline",
+      "writer",
+      "reviewer",
+      "finalizer",
+      "illustrator"
+    ],
+    "image": true,
+    "publisher": true
+  }
+}

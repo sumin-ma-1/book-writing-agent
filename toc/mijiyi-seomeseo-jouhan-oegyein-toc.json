@@ -1,0 +1,63 @@
+{
+  "type": "picture_book",
+  "title": "미지의 섬에서 조우한 외계인",
+  "description": "낯선 존재와의 만남을 통해 인간이 두려움과 편견을 넘어 이해와 공존을 닮은 이야기",
+  "language": "ko",
+  "target_age": "18세 이상",
+  "style": "Surrealist digital art, contrasting colors between neon-glow extraterrestrial elements and realistic nature, cinematic composition",
+  "writing_guidelines": [
+    "냉소적인 유머와 철학적인 독백이 포함된 문체",
+    "깊은 여운을 가진 역설적 표현 사용",
+    "외계인의 대화는 의성어를 사용하여 사용자가 재밌게 읽을 수도 있지만 소통의 불완전성을 암시"
+  ],
+  "characters": [
+    {
+      "name": "김철수",
+      "description": "지친 현대인, 정장으로 가려진 피로와 무표정한 얼굴, 항상 작은 수첩을 들고 다니는 분석적 성격"
+    },
+    {
+      "name": "글리프(Glyph)",
+      "description": "기하학적 형태의 신체로 구성된 외계인. 색깔이 감정에 따라 변하며, 인간의 언어를 이해하지 못하지만 음악적 파동으로 소통함"
+    }
+  ],
+  "pages": [
+    {
+      "number": 1,
+      "scene": "폭풍우 속에서 작은 보트가 이름 모를 섬에 난파된 김철수의 모습. 주변은 보랏빛 숲과 보라색 모래로이 가득한 낯선 풍경",
+      "mood": "혼란스럽고 초현실적인"
+    },
+    {
+      "number": 2,
+      "scene": "철수가 수첩에 '생존자: 나'라고 적으며 주변을 살피는 장면. 숲속에서 거대한 눈동자 하나가 그를 뚫어지게 쳐다보는 모습",
+      "mood": "긴장감 넘치는"
+    },
+    {
+      "number": 3,
+      "scene": "철수가 소리를 지르며 도망치다가 진흙탕에 빠진 모습. 그 앞에 천천히 나타난 외계인 글리프의 기하학적 형태가 드러남",
+      "mood": "코믹하고 당혹스러운"
+    },
+    {
+      "number": 4,
+      "scene": "철수가 분석적 태도로 글리프를 관찰하며 '외계인=위험'이라고 수첩에 적는 장면. 글리프는 고개를 갸우뚱하며 호기심을 대해 그를 관찰하고 있음",
+      "mood": "관찰적이고 냉소적인"
+    },
+    {
+      "number": 5,
+      "scene": "철수가 글리프에게 식량을 제공하려 하지만, 글리 그리고는 식량의 색깔을 바꾸어 다른 차원으로 보내버리는 황당한 상황",
+      "mood": "황당하고 유머러스한"
+    }
+  ],
+  "pipeline": {
+    "style_bible": true,
+    "storyboard": true,
+    "agents": [
+      "outline",
+      "writer",
+      "reviewer",
+      "finalizer",
+      "illustrator"
+    ],
+    "image": true,
+    "publisher": true
+  }
+}

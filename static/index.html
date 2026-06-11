@@ -1,0 +1,2825 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Writing Agent</title>
+  <link rel="icon" href="/static/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a2332;
+      --border: #2d3a4f;
+      --text: #e7ecf3;
+      --muted: #8b9cb3;
+      --accent: #5b9fd4;
+      --green: #4ade80;
+      --red: #f87171;
+      --orange: #fbbf24;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    header h1 .app-logo {
+      width: 2rem;
+      height: 2rem;
+      object-fit: contain;
+      flex-shrink: 0;
+      image-rendering: auto;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      font-size: 1.125rem;
+      line-height: 1;
+      vertical-align: middle;
+      user-select: none;
+    }
+    .material-symbols-outlined.icon-sm { font-size: 0.95rem; }
+    .material-symbols-outlined.icon-lg { font-size: 1.35rem; }
+    .with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      justify-content: center;
+    }
+    .card h2, .modal-header h2, .modal-section h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    button .material-symbols-outlined { font-size: 1.05rem; }
+    .modal-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close .material-symbols-outlined { font-size: 1.35rem; }
+    .toc-item-actions button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .toc-item-actions .material-symbols-outlined { font-size: 0.9rem; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .header-actions button.header-btn {
+      width: auto;
+      margin: 0;
+      padding: 0.3rem 0.65rem;
+      font-size: 0.75rem;
+    }
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: var(--border);
+    }
+    .badge.online { background: #14532d; color: var(--green); }
+    .badge.offline { background: #450a0a; color: var(--red); }
+    main {
+      display: grid;
+      grid-template-columns: 320px 1fr 360px;
+      gap: 1rem;
+      padding: 1rem 2rem 2rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0.6rem 0 0.25rem;
+    }
+    select, input:not([type="checkbox"]), button, textarea {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    label.checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    label.checkbox-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+    label.rewrite-parts-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.35rem 0 0;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    label.rewrite-parts-row input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      max-width: 12rem;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.85rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+    }
+    label.rewrite-parts-row input[type="text"]:disabled {
+      opacity: 0.5;
+    }
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      border: none;
+      font-weight: 600;
+      margin-top: 0.75rem;
+    }
+    button:hover { filter: brightness(1.1); }
+    button.secondary { background: var(--border); }
+    button.danger { background: #7f1d1d; }
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .spec-item span { color: var(--muted); display: block; font-size: 0.75rem; }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .status-url { color: var(--muted); font-size: 0.75rem; }
+    button.link-btn {
+      width: auto;
+      margin: 0;
+      padding: 0.3rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--accent);
+    }
+    button.link-btn:hover { background: var(--border); }
+    .log-box {
+      background: #080c10;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-family: Consolas, monospace;
+      font-size: 0.75rem;
+      height: 360px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    #job-phase-hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0.35rem 0 0.5rem;
+    }
+    .progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      transition: width 0.3s;
+    }
+    .output-item {
+      padding: 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .output-item .meta { color: var(--muted); font-size: 0.75rem; margin-top: 0.25rem; }
+    .output-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .output-actions button { margin: 0; flex: 1; font-size: 0.8rem; padding: 0.35rem; }
+    .hint { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; }
+    .preview img { max-width: 100%; border-radius: 6px; margin-top: 0.5rem; }
+    .pdf-preview-frame {
+      width: 100%;
+      height: min(72vh, 640px);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 0.75rem;
+      background: #1a1a1a;
+    }
+    .pdf-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .pdf-actions button { margin: 0; flex: 0 1 auto; }
+    .job-pdf-result {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      border: 1px solid var(--green);
+      border-radius: 8px;
+      background: rgba(34, 197, 94, 0.08);
+    }
+    .job-pdf-result.failed {
+      border-color: #7f1d1d;
+      background: rgba(127, 29, 29, 0.12);
+    }
+    .job-pdf-result strong { display: block; margin-bottom: 0.35rem; }
+    .preview-thumb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .preview-thumb-grid img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .btn-row { display: flex; gap: 0.5rem; }
+    .btn-row button { flex: 1; margin-top: 0.75rem; }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 85vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal.modal-wide { max-width: 720px; }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header h2 { font-size: 1rem; color: var(--text); margin: 0; }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0 0.25rem;
+      margin: 0;
+      width: auto;
+    }
+    .modal-body {
+      padding: 1rem 1.25rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-section { margin-bottom: 1.25rem; }
+    .modal-section h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .model-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      gap: 0.5rem;
+    }
+    .model-row .info { flex: 1; min-width: 0; }
+    .model-row .name { word-break: break-all; }
+    .model-row .size { color: var(--muted); font-size: 0.75rem; }
+    .model-row button {
+      width: auto;
+      margin: 0;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+      background: #7f1d1d;
+    }
+    .modal-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.25rem;
+    }
+    .modal-tab {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      margin: 0;
+      width: auto;
+      border-radius: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .modal-tab:hover { color: var(--text); }
+    .modal-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .modal-panel { display: none; }
+    .modal-panel.active { display: block; }
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .search-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    .search-row input {
+      flex: 1;
+      margin: 0;
+    }
+    .search-row button {
+      width: auto;
+      margin: 0;
+      padding: 0.5rem 0.75rem;
+      white-space: nowrap;
+    }
+    .download-progress {
+      display: none;
+      margin-top: 0.5rem;
+    }
+    .download-progress.active { display: block; }
+    .download-progress progress {
+      width: 100%;
+      height: 8px;
+      margin-top: 0.35rem;
+    }
+    .modal-footer {
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .modal-footer button { margin: 0; }
+    .pipeline-flow {
+      margin-top: 0.5rem;
+      padding: 0.65rem;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.15);
+    }
+    .pipeline-builder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+    }
+    #pipeline-hint { text-align: left; margin-bottom: 0.25rem; }
+    .pipe-block {
+      padding: 0.35rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: opacity 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .pipe-block.on {
+      border-color: var(--accent);
+      background: rgba(91, 159, 212, 0.18);
+      color: var(--text);
+    }
+    .pipe-block.off {
+      opacity: 0.42;
+      text-decoration: line-through;
+    }
+    .pipe-arrow {
+      color: var(--muted);
+      font-size: 0.65rem;
+      user-select: none;
+    }
+    .pipe-loop {
+      font-size: 0.65rem;
+      color: var(--orange);
+      padding: 0.2rem 0.45rem;
+      border: 1px dotted var(--border);
+      border-radius: 4px;
+      width: 100%;
+      text-align: center;
+      margin: 0.15rem 0;
+    }
+    #btn-save-pipeline { font-size: 0.8rem; padding: 0.4rem 0.6rem; }
+    .workflow-toc-info {
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      background: rgba(91, 159, 212, 0.1);
+      border: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+      font-size: 0.85rem;
+    }
+    .workflow-toc-info strong { color: var(--accent); }
+    .workflow-actions { margin-top: 0.75rem; }
+    .workflow-actions button { margin-top: 0.5rem; }
+    #workflow-toc-gen .spinner-text { color: var(--muted); font-size: 0.9rem; }
+    .toc-gen-status { margin-top: 0.25rem; }
+    .toc-gen-phase {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: var(--accent);
+    }
+    .toc-gen-phase.phase-loading { color: var(--orange); }
+    .toc-gen-phase.phase-generating { color: var(--green); }
+    .toc-gen-timer { font-weight: 400; color: var(--muted); font-size: 0.85rem; }
+    #toc-gen-detail { margin-bottom: 0.25rem; }
+    #toc-gen-eta { margin-bottom: 0.6rem; font-size: 0.8rem; color: var(--muted); }
+    #toc-gen-eta strong { color: var(--text); font-weight: 600; }
+    .pipe-zone {
+      width: fit-content;
+      max-width: 100%;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.12);
+    }
+    .pipe-zone-loop { border-color: rgba(251, 191, 36, 0.4); }
+    .pipe-zone-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+      white-space: nowrap;
+    }
+    .pipe-zone-blocks {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+    }
+    .pipe-palette {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      margin-top: 0.4rem;
+      padding-top: 0.4rem;
+      border-top: 1px dashed var(--border);
+    }
+    .pipe-palette-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-right: 0.15rem;
+    }
+    .pipe-block.add {
+      border-style: dashed;
+      opacity: 1;
+      text-decoration: none;
+      color: var(--muted);
+    }
+    .pipe-block.add:hover { border-color: var(--accent); color: var(--accent); }
+    .pipe-block.locked {
+      cursor: default;
+      opacity: 1;
+      text-decoration: none;
+    }
+    .pipe-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+    .pipe-toolbar button { width: auto; margin: 0; font-size: 0.75rem; padding: 0.35rem 0.6rem; }
+    .workflow-toc-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+    .workflow-toc-actions button { width: auto; margin: 0; font-size: 0.75rem; padding: 0.35rem 0.65rem; }
+    .toc-item-row {
+      display: grid;
+      grid-template-columns: 2rem 1fr auto;
+      gap: 0.4rem;
+      align-items: start;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .toc-item-row textarea { min-height: 2.5rem; font-size: 0.8rem; }
+    .toc-item-row input { font-size: 0.85rem; margin: 0; }
+    .toc-item-num {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      padding-top: 0.45rem;
+      text-align: center;
+    }
+    .toc-item-actions { display: flex; flex-direction: column; gap: 0.2rem; }
+    .toc-item-actions button {
+      width: 1.6rem;
+      height: 1.6rem;
+      margin: 0;
+      padding: 0;
+      font-size: 0.75rem;
+      background: var(--border);
+    }
+    .toc-item-actions button.toc-item-del { background: #7f1d1d; }
+    .toc-items-list { max-height: 40vh; overflow-y: auto; margin: 0.5rem 0; }
+    #toc-modal-status { min-height: 1.2rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><img src="/static/logo-64.png" alt="" class="app-logo" width="32" height="32"> Book Writing Agent</h1>
+    <div class="header-actions">
+      <span id="ollama-badge" class="badge offline"><span class="material-symbols-outlined icon-sm">text_fields</span> Ollama</span>
+      <span id="forge-badge" class="badge offline"><span class="material-symbols-outlined icon-sm">brush</span> Forge</span>
+      <button type="button" id="btn-system-info" class="secondary header-btn with-icon"><span class="material-symbols-outlined icon-sm">computer</span> 시스템</button>
+      <button type="button" id="btn-model-manage" class="secondary header-btn with-icon"><span class="material-symbols-outlined icon-sm">tune</span> 모델 관리</button>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="card">
+        <h2><span class="material-symbols-outlined">hub</span> 모델 선택</h2>
+        <label>텍스트 모델 (Ollama / 서버)</label>
+        <select id="text-model"><option value="">불러오는 중...</option></select>
+
+        <div id="image-settings">
+          <label>이미지 백엔드</label>
+          <select id="image-backend">
+            <option value="automatic1111">Forge (로컬, 기본)</option>
+            <option value="diffusers">diffusers (대안, Hugging Face)</option>
+            <option value="ollama">Ollama (macOS 전용)</option>
+          </select>
+          <p class="hint">그림 생성은 <strong>Forge</strong> 사용을 권장합니다.</p>
+          <label>이미지 모델 / 체크포인트</label>
+          <select id="image-model"><option value="">Forge 현재 선택</option></select>
+        </div>
+        <button id="btn-refresh-models" class="secondary with-icon"><span class="material-symbols-outlined">refresh</span> 모델 새로고침</button>
+      </div>
+
+      <div class="card">
+        <h2><span class="material-symbols-outlined">library_books</span> 책 기획 (목차)</h2>
+        <label>책 종류</label>
+        <select id="book-type">
+          <option value="text">텍스트 책</option>
+          <option value="picture">그림책</option>
+        </select>
+        <label>책 제목</label>
+        <input type="text" id="gen-title" placeholder="예: 파이썬 입문, 숲속의 작은 토끼">
+        <label>주제 / 줄거리</label>
+        <textarea id="gen-topic" rows="3" placeholder="어떤 내용의 책인지 간단히 적어 주세요"></textarea>
+        <label id="gen-count-label">장(챕터) 수</label>
+        <input type="number" id="gen-count" min="1" max="30" value="5">
+        <div id="toc-picture-fields">
+          <label>언어</label>
+          <select id="gen-language">
+            <option value="ko">한국어</option>
+            <option value="en">English</option>
+          </select>
+          <label>대상 연령</label>
+          <input type="text" id="gen-age" value="3-5" placeholder="예: 3-5, 10-14, 18세 이상">
+        </div>
+        <label>추가 요청 (선택)</label>
+        <textarea id="gen-notes" rows="2" placeholder="예: 유머러스하게, 기술 초보자 대상"></textarea>
+
+        <button type="button" id="btn-generate-toc" class="secondary with-icon"><span class="material-symbols-outlined">auto_awesome</span> 목차 생성 (AI)</button>
+        <p class="hint" id="gen-toc-status"></p>
+
+        <label>목차 파일</label>
+        <select id="toc-file"></select>
+        <div class="btn-row">
+          <button type="button" id="btn-toc-export" class="secondary with-icon"><span class="material-symbols-outlined">download</span> 보내기</button>
+          <button type="button" id="btn-toc-import" class="secondary with-icon"><span class="material-symbols-outlined">upload</span> 가져오기</button>
+        </div>
+        <input type="file" id="toc-import-input" accept=".json,application/json" hidden>
+        <p class="hint" id="toc-io-status"></p>
+      </div>
+
+    </section>
+
+    <section>
+      <div class="card">
+        <h2><span class="material-symbols-outlined">timeline</span> 생성 진행</h2>
+
+        <div id="workflow-idle">
+          <p class="hint with-icon"><span class="material-symbols-outlined">info</span> 왼쪽에서 <strong>목차 생성 (AI)</strong>을 누르거나 목차 파일을 선택하면, 여기서 파이프라인을 조정하고 책 생성을 시작할 수 있습니다.</p>
+        </div>
+
+        <div id="workflow-toc-gen" style="display:none">
+          <div class="toc-gen-status">
+            <p id="toc-gen-phase" class="toc-gen-phase phase-loading with-icon"></p>
+            <p id="toc-gen-detail" class="hint"></p>
+            <p id="toc-gen-eta" class="hint"></p>
+            <div class="progress-bar"><div id="toc-gen-progress" class="progress-fill" style="width:5%"></div></div>
+          </div>
+        </div>
+
+        <div id="workflow-pipeline" style="display:none">
+          <div id="workflow-toc-info" class="workflow-toc-info"></div>
+          <div class="workflow-toc-actions">
+            <button type="button" id="btn-toc-manage" class="secondary with-icon"><span class="material-symbols-outlined">edit_note</span> 목차 확인·수정</button>
+          </div>
+          <label>에이전트 파이프라인</label>
+          <p class="hint" id="pipeline-hint">블록을 클릭해 에이전트를 끄고, <strong>+ 추가</strong>로 다시 넣을 수 있습니다.</p>
+          <div id="pipeline-flow" class="pipeline-flow pipeline-builder"><span class="hint">로딩 중...</span></div>
+          <div class="pipe-toolbar">
+            <button type="button" id="btn-pipeline-reset" class="secondary with-icon"><span class="material-symbols-outlined">restore</span> 기본값 복원</button>
+            <button type="button" id="btn-save-pipeline" class="secondary with-icon"><span class="material-symbols-outlined">save</span> 파이프라인 저장</button>
+          </div>
+          <div class="workflow-actions">
+            <p class="hint" id="pipeline-status"></p>
+            <label class="checkbox-row">
+              <input type="checkbox" id="resume">
+              <span>이어서 작성 (--resume)</span>
+            </label>
+            <label class="checkbox-row">
+              <input type="checkbox" id="rewrite-all">
+              <span id="rewrite-all-label">전체 다시 생성 (--rewrite-all)</span>
+            </label>
+            <label class="rewrite-parts-row">
+              <span id="rewrite-parts-label">특정 번호만</span>
+              <input type="text" id="rewrite-parts" placeholder="예: 1, 3, 5" inputmode="numeric" autocomplete="off">
+            </label>
+            <p class="hint" id="rewrite-hint">다시 생성은 기존 출력 폴더가 있을 때 동작합니다. Style Bible·스토리보드(또는 Book Bible)는 유지되고 페이지·장 본문만 다시 씁니다.</p>
+            <button type="button" id="btn-start" class="with-icon"><span class="material-symbols-outlined">play_arrow</span> 책 생성 시작</button>
+          </div>
+        </div>
+
+        <div id="workflow-job" style="display:none">
+          <div id="job-status">실행 중</div>
+          <div id="job-phase-hint" class="hint"></div>
+          <div class="progress-bar"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
+          <div class="log-box" id="log-box">로그가 여기 표시됩니다.</div>
+          <div id="job-pdf-result" class="job-pdf-result" style="display:none"></div>
+          <button id="btn-stop" class="danger secondary with-icon" style="display:none"><span class="material-symbols-outlined">stop_circle</span> 중지</button>
+        </div>
+      </div>
+
+      <div class="card preview" id="preview-card" style="display:none">
+        <h2><span class="material-symbols-outlined">preview</span> 미리보기</h2>
+        <div id="preview-content"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <h2><span class="material-symbols-outlined">collections_bookmark</span> 생성된 책</h2>
+        <div id="outputs-list">로딩 중...</div>
+        <button id="btn-refresh-outputs" class="secondary with-icon"><span class="material-symbols-outlined">refresh</span> 목록 새로고침</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toc-modal" class="modal-overlay">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <h2><span class="material-symbols-outlined">list_alt</span> 목차 관리</h2>
+        <button class="modal-close" id="toc-modal-close" aria-label="닫기"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <p class="hint" id="toc-modal-file"></p>
+        <label>책 제목</label>
+        <input type="text" id="toc-edit-title">
+        <label>책 설명</label>
+        <textarea id="toc-edit-desc" rows="2"></textarea>
+        <div id="toc-edit-picture-meta" style="display:none">
+          <label>그림 스타일</label>
+          <input type="text" id="toc-edit-style">
+          <label>대상 연령</label>
+          <input type="text" id="toc-edit-age">
+        </div>
+        <div class="modal-section">
+          <h3 id="toc-edit-items-label">장 목록</h3>
+          <div id="toc-edit-items" class="toc-items-list"></div>
+          <button type="button" id="toc-add-item" class="secondary with-icon"><span class="material-symbols-outlined">add</span> 항목 추가</button>
+        </div>
+        <p class="hint" id="toc-modal-status"></p>
+      </div>
+      <div class="modal-footer" style="display:flex;gap:0.5rem;justify-content:flex-end">
+        <button type="button" class="secondary with-icon" id="toc-modal-cancel"><span class="material-symbols-outlined">close</span> 닫기</button>
+        <button type="button" class="with-icon" id="toc-modal-save"><span class="material-symbols-outlined">save</span> 저장</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="system-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><span class="material-symbols-outlined">computer</span> 시스템 · 연결 상태</h2>
+        <button class="modal-close" id="system-modal-close" aria-label="닫기"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <h3>시스템 사양</h3>
+          <div id="specs" class="spec-grid">로딩 중...</div>
+        </div>
+        <div class="modal-section">
+          <h3>연결 상태</h3>
+          <div id="connections"></div>
+          <p class="hint">글(Ollama): SSH 터널 <code>ssh -L 11434:localhost:11434 user@server</code><br>
+          그림(Forge): 로컬 <code>webui-user.bat</code> 실행</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="secondary with-icon" id="btn-system-refresh"><span class="material-symbols-outlined">refresh</span> 새로고침</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="model-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><span class="material-symbols-outlined">tune</span> 모델 관리</h2>
+        <button class="modal-close" id="modal-close" aria-label="닫기"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="modal-tabs">
+        <button type="button" class="modal-tab active with-icon" data-tab="text"><span class="material-symbols-outlined icon-sm">text_fields</span> 텍스트 모델</button>
+        <button type="button" class="modal-tab with-icon" data-tab="image"><span class="material-symbols-outlined icon-sm">image</span> 이미지 모델</button>
+      </div>
+      <div class="modal-body">
+        <div id="panel-text" class="modal-panel active">
+          <div class="modal-section">
+            <h3>설치된 Ollama 모델 (서버)</h3>
+            <div id="modal-text-models"><p class="hint">로딩 중...</p></div>
+            <p class="hint">새 모델 설치: SSH로 서버 접속 후 <code>ollama pull 모델명</code></p>
+            <div class="modal-actions">
+              <button type="button" class="link-btn with-icon" id="link-ollama-library"><span class="material-symbols-outlined icon-sm">open_in_new</span> Ollama 모델 목록</button>
+            </div>
+          </div>
+        </div>
+        <div id="panel-image" class="modal-panel">
+          <div class="modal-section">
+            <h3>무료 모델 다운로드 (Civitai)</h3>
+            <label>추천 모델 (SD 1.5 · 6GB VRAM)</label>
+            <select id="checkpoint-recommended"><option value="">불러오는 중...</option></select>
+            <label>검색</label>
+            <div class="search-row">
+              <input type="text" id="checkpoint-search" placeholder="예: dreamshaper, anime">
+              <button type="button" id="btn-checkpoint-search" class="secondary with-icon"><span class="material-symbols-outlined">search</span> 검색</button>
+            </div>
+            <label>검색 결과</label>
+            <select id="checkpoint-search-results">
+              <option value="">검색 후 선택</option>
+            </select>
+            <button type="button" id="btn-checkpoint-download" class="with-icon"><span class="material-symbols-outlined">download</span> 선택한 모델 다운로드</button>
+            <div id="download-progress" class="download-progress">
+              <p class="hint" id="download-status-text"></p>
+              <progress id="download-progress-bar" value="0" max="100"></progress>
+            </div>
+            <p class="hint">Civitai 무료 체크포인트를 Forge 폴더로 받습니다. 로그인 필요 모델은 <code>CIVITAI_API_TOKEN</code> 환경변수 설정.</p>
+          </div>
+          <div class="modal-section">
+            <h3>설치된 체크포인트</h3>
+            <p class="hint" id="modal-forge-dir"></p>
+            <div id="modal-image-models"><p class="hint">로딩 중...</p></div>
+            <div class="modal-actions">
+              <button type="button" class="link-btn with-icon" id="link-forge-ui"><span class="material-symbols-outlined icon-sm">open_in_new</span> Forge UI</button>
+              <button type="button" class="link-btn with-icon" id="link-civitai"><span class="material-symbols-outlined icon-sm">open_in_new</span> Civitai</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="secondary with-icon" id="modal-refresh"><span class="material-symbols-outlined">refresh</span> 목록 새로고침</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PIPELINE_SCHEMA_FALLBACK = {
+      default_text: {
+        book_bible: true,
+        chapter_summary: true,
+        agents: ["outline", "writer", "reviewer", "finalizer"],
+        publisher: true,
+      },
+      default_picture: {
+        style_bible: true,
+        storyboard: true,
+        agents: ["outline", "writer", "reviewer", "finalizer", "illustrator"],
+        image: true,
+        publisher: true,
+      },
+      setup_text: [
+        { id: "book_bible", label: "Book Bible" },
+        { id: "chapter_summary", label: "장 요약" },
+      ],
+      setup_picture: [
+        { id: "style_bible", label: "Style Bible" },
+        { id: "storyboard", label: "스토리보드" },
+      ],
+      agents_text: [
+        { id: "outline", label: "개요", group: "chapter" },
+        { id: "writer", label: "집필", group: "chapter" },
+        { id: "reviewer", label: "퇴고", group: "chapter" },
+        { id: "finalizer", label: "마무리", group: "chapter" },
+      ],
+      agents_picture: [
+        { id: "outline", label: "개요", group: "page" },
+        { id: "writer", label: "집필", group: "page" },
+        { id: "reviewer", label: "퇴고", group: "page" },
+        { id: "finalizer", label: "마무리", group: "page" },
+        { id: "illustrator", label: "그림 프롬프트", group: "page" },
+      ],
+      finish: [{ id: "publisher", label: "PDF 출판" }],
+      extra_picture: [{ id: "image", label: "이미지 생성" }],
+    };
+
+    const PICTURE_AGENT_ORDER = [
+      "outline", "writer", "reviewer", "finalizer", "illustrator",
+    ];
+    const PICTURE_AGENT_ALIASES = { page_writer: "writer" };
+    const PICTURE_PAGE_STEPS = [
+      { id: "outline", label: "개요", step: 1 },
+      { id: "writer", label: "집필", step: 2 },
+      { id: "reviewer", label: "퇴고", step: 3 },
+      { id: "finalizer", label: "마무리", step: 4 },
+      { id: "illustrator", label: "그림 프롬프트", step: 5 },
+    ];
+    let currentJobId = null;
+    let pollTimer = null;
+    let pipelineSchema = null;
+    let currentPipeline = null;
+    let tocPipelineMap = {};
+    let tocFileMetaMap = {};
+    let tocEditData = null;
+    let tocEditPath = null;
+    let tocEditBookType = "text";
+
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function escAttr(s) {
+      return escHtml(s);
+    }
+
+    function icon(name, cls = "") {
+      return `<span class="material-symbols-outlined${cls ? " " + cls : ""}">${name}</span>`;
+    }
+
+    function setStatusBadge(el, iconName, label, online, extra = "") {
+      const statusIcon = online ? "check_circle" : "cancel";
+      el.innerHTML = `${icon(iconName, "icon-sm")} ${label} ${icon(statusIcon, "icon-sm")}${extra}`;
+      el.className = "badge " + (online ? "online" : "offline");
+    }
+
+    function normalizeTocPath(p) {
+      const s = String(p).replace(/\\/g, "/");
+      if (/^[A-Za-z]:\//.test(s) || s.startsWith("/")) {
+        return s.split("/").pop() || s;
+      }
+      return s;
+    }
+
+    function getPipelineSchema() {
+      const schema = pipelineSchema || PIPELINE_SCHEMA_FALLBACK;
+      const pictureAgents = schema.agents_picture || [];
+      const legacyPicture =
+        pictureAgents.length <= 2 &&
+        pictureAgents.some((b) => b.id === "page_writer");
+      if (legacyPicture) {
+        return {
+          ...schema,
+          agents_picture: PIPELINE_SCHEMA_FALLBACK.agents_picture,
+          default_picture: PIPELINE_SCHEMA_FALLBACK.default_picture,
+        };
+      }
+      return schema;
+    }
+
+    function isPictureBookType(bookType) {
+      return bookType === "picture";
+    }
+
+    function bookTypeFromTocData(toc) {
+      if (!toc) return "text";
+      if (toc.type === "picture_book" || (toc.pages && toc.pages.length)) return "picture";
+      if (toc.type === "text_book" || (toc.chapters && toc.chapters.length)) return "text";
+      return "text";
+    }
+
+    function normalizePictureAgentsList(agents) {
+      const list = (agents || [])
+        .map((a) => PICTURE_AGENT_ALIASES[a] || a)
+        .filter((a) => PICTURE_AGENT_ORDER.includes(a));
+      const unique = [...new Set(list)].sort(
+        (a, b) => PICTURE_AGENT_ORDER.indexOf(a) - PICTURE_AGENT_ORDER.indexOf(b),
+      );
+      if (!unique.length) return [...PICTURE_AGENT_ORDER];
+      if (unique.includes("illustrator") && !unique.includes("writer")) {
+        return [...PICTURE_AGENT_ORDER];
+      }
+      return unique;
+    }
+
+    function ensurePicturePipeline(pipeline) {
+      const p = pipeline
+        ? JSON.parse(JSON.stringify(pipeline))
+        : defaultPipelineForType("picture");
+      p.agents = normalizePictureAgentsList(p.agents);
+      if (p.style_bible === undefined) p.style_bible = true;
+      if (p.storyboard === undefined) p.storyboard = true;
+      if (p.image === undefined) p.image = true;
+      if (p.publisher === undefined) p.publisher = true;
+      return p;
+    }
+
+    function pipelineAgentEnabled(agentId) {
+      const agents = currentPipeline?.agents || [];
+      if (agents.includes(agentId)) return true;
+      for (const [legacy, canonical] of Object.entries(PICTURE_AGENT_ALIASES)) {
+        if (canonical === agentId && agents.includes(legacy)) return true;
+      }
+      return false;
+    }
+
+    async function api(path, opts = {}, timeoutMs = 15000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(path, { ...opts, signal: controller.signal });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || res.statusText);
+        }
+        return res.json();
+      } catch (err) {
+        if (err.name === "AbortError") {
+          const isTocGen = path.includes("/toc/generate");
+          const isOllama = path.includes("/models/text") || isTocGen;
+          throw new Error(
+            isTocGen
+              ? "목차 생성 시간 초과 — gemma4:31b 등 큰 모델은 10분 이상 걸릴 수 있습니다. 잠시 후 다시 시도하거나 더 작은 모델을 선택하세요."
+              : isOllama
+                ? "요청 시간 초과 — Ollama SSH 터널(11434) 또는 UI 서버(python run_ui.py)를 확인하세요"
+                : "요청 시간 초과 — UI 서버가 응답하지 않습니다. python run_ui.py 재시작 후 F5"
+          );
+        }
+        throw err;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function showWorkflowState(state) {
+      document.getElementById("workflow-idle").style.display = state === "idle" ? "block" : "none";
+      document.getElementById("workflow-toc-gen").style.display = state === "toc-gen" ? "block" : "none";
+      document.getElementById("workflow-pipeline").style.display = state === "pipeline" ? "block" : "none";
+      document.getElementById("workflow-job").style.display = state === "job" ? "block" : "none";
+    }
+
+    function updateWorkflowTocInfo({ title, filename, count, unit, path }) {
+      const el = document.getElementById("workflow-toc-info");
+      const parts = [`<strong>${title || "목차"}</strong>`];
+      if (count != null && unit) {
+        parts.push(` · ${count} ${unit}`);
+      }
+      if (filename) {
+        parts.push(`<br><span class="hint">${filename}</span>`);
+      } else if (path) {
+        parts.push(`<br><span class="hint">${path.split(/[/\\]/).pop()}</span>`);
+      }
+      el.innerHTML = parts.join("");
+    }
+
+    function showPipelinePanel(meta = {}) {
+      updateWorkflowTocInfo(meta);
+      renderPipeline();
+      showWorkflowState("pipeline");
+    }
+
+    async function loadSystem() {
+      const sys = await api("/api/system");
+      const specs = document.getElementById("specs");
+      const gpu = sys.gpus?.[0];
+      specs.innerHTML = `
+        <div class="spec-item"><span>OS</span>${sys.os} ${sys.os_version?.slice(0,20) || ""}</div>
+        <div class="spec-item"><span>Python</span>${sys.python}</div>
+        <div class="spec-item"><span>RAM</span>${sys.ram_gb ?? "?"} GB</div>
+        <div class="spec-item"><span>디스크 여유</span>${sys.disk_free_gb} GB</div>
+        <div class="spec-item"><span>GPU</span>${gpu ? gpu.name : "없음"}</div>
+        <div class="spec-item"><span>VRAM</span>${gpu ? gpu.vram_free_mb + "/" + gpu.vram_total_mb + " MB" : "-"}</div>
+      `;
+
+      setStatusBadge(
+        document.getElementById("ollama-badge"),
+        "text_fields",
+        "Ollama",
+        sys.ollama.online,
+      );
+      setStatusBadge(
+        document.getElementById("forge-badge"),
+        "brush",
+        "Forge",
+        sys.forge.online,
+        sys.forge.online ? ` (${sys.forge.checkpoint_count})` : "",
+      );
+
+      modalLinks.forge_ui = sys.forge.url;
+
+      document.getElementById("connections").innerHTML = `
+        <div class="status-row">
+          <span class="with-icon">${icon("text_fields", "icon-sm")} Ollama (글)</span>
+          <span class="status-url">${sys.ollama.url}</span>
+        </div>
+        <div class="status-row">
+          <span class="with-icon">${icon("brush", "icon-sm")} Forge (그림)</span>
+          <span class="status-url">${sys.forge.url}</span>
+        </div>
+      `;
+    }
+
+    function updateBookTypeDependentUi(bookType) {
+      const bt = bookType || getBookTypeFromToc();
+      const isPicture = isPictureBookType(bt);
+      document.getElementById("book-type").value = bt;
+      document.getElementById("image-settings").style.display = isPicture ? "block" : "none";
+      document.getElementById("toc-picture-fields").style.display = isPicture ? "block" : "none";
+      document.getElementById("gen-count-label").textContent = isPicture ? "페이지 수" : "장(챕터) 수";
+      const unit = isPicture ? "페이지" : "장";
+      document.getElementById("rewrite-all-label").textContent =
+        `전체 ${unit} 다시 생성 (--rewrite-all)`;
+      document.getElementById("rewrite-parts-label").textContent =
+        `특정 ${unit} 번호만 (--rewrite)`;
+      document.getElementById("rewrite-parts").placeholder = isPicture ? "예: 1, 3, 5" : "예: 1, 2";
+    }
+
+    function syncBookTypeUi() {
+      updateBookTypeDependentUi();
+      renderPipeline();
+    }
+
+    function parseRewriteParts(raw) {
+      if (!raw || !raw.trim()) return [];
+      const nums = raw.split(/[,\s]+/)
+        .map((s) => parseInt(s.trim(), 10))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      return [...new Set(nums)].sort((a, b) => a - b);
+    }
+
+    function syncRewriteControls() {
+      const all = document.getElementById("rewrite-all");
+      const parts = document.getElementById("rewrite-parts");
+      const hasParts = parseRewriteParts(parts.value).length > 0;
+      if (all.checked) {
+        parts.disabled = true;
+        parts.value = "";
+      } else {
+        parts.disabled = false;
+      }
+      if (hasParts) all.checked = false;
+    }
+
+    function defaultPipelineForType(bookType) {
+      const schema = getPipelineSchema();
+      const src = bookType === "picture"
+        ? schema.default_picture
+        : schema.default_text;
+      return JSON.parse(JSON.stringify(src));
+    }
+
+    function getBookTypeFromToc() {
+      const toc = document.getElementById("toc-file");
+      const path = toc?.value;
+      if (path) {
+        const opt = toc.selectedOptions?.[0];
+        if (opt?.dataset?.type) return opt.dataset.type;
+        const meta = tocFileMetaMap[path];
+        if (meta?.type === "picture_book") return "picture";
+        if (meta?.type === "text_book") return "text";
+      }
+      return document.getElementById("book-type").value || "text";
+    }
+
+    function isPictureBookContext() {
+      return getBookTypeFromToc() === "picture";
+    }
+
+    function isBlockEnabled(id) {
+      const p = currentPipeline;
+      if (!p) return true;
+      if (id === "book_bible") return !!p.book_bible;
+      if (id === "chapter_summary") return !!p.chapter_summary;
+      if (id === "style_bible") return !!p.style_bible;
+      if (id === "storyboard") return !!p.storyboard;
+      if (id === "image") return !!p.image;
+      if (id === "publisher") return !!p.publisher;
+      return pipelineAgentEnabled(id);
+    }
+
+    function togglePipelineBlock(id) {
+      if (!currentPipeline) return;
+      const bookType = getBookTypeFromToc();
+      const setupIds = bookType === "picture"
+        ? ["style_bible", "storyboard"]
+        : ["book_bible", "chapter_summary"];
+      if (setupIds.includes(id) || id === "image" || id === "publisher") {
+        currentPipeline[id] = !currentPipeline[id];
+      } else {
+        const order = bookType === "picture"
+          ? PICTURE_AGENT_ORDER
+          : getPipelineSchema().agents_text.map((b) => b.id);
+        const agents = [...(currentPipeline.agents || [])];
+        const idx = agents.indexOf(id);
+        if (idx >= 0) {
+          if (agents.length <= 1) {
+            alert("최소 한 개의 에이전트는 켜 두어야 합니다.");
+            return;
+          }
+          const next = agents.filter((_, i) => i !== idx);
+          if (bookType === "picture" && next.includes("illustrator") && !next.includes("writer")) {
+            alert("그림 프롬프트만 단독으로 둘 수 없습니다. 집필(또는 글 단계)이 함께 필요합니다.");
+            return;
+          }
+          currentPipeline.agents = next;
+        } else {
+          agents.push(id);
+          currentPipeline.agents = agents.sort(
+            (a, b) => order.indexOf(a) - order.indexOf(b),
+          );
+        }
+      }
+      renderPipeline();
+    }
+
+    function pipeBlockHtml(id, label, on, mode = "toggle", locked = false) {
+      if (locked) {
+        return `<span class="pipe-block on locked" data-id="${id}" data-locked="1" title="그림책 페이지 단계 (항상 포함)">${label}</span>`;
+      }
+      const cls = mode === "add" ? "pipe-block add" : `pipe-block ${on ? "on" : "off"}`;
+      const title = mode === "add" ? "클릭: 추가" : `클릭: ${on ? "끄기" : "켜기"}`;
+      const text = mode === "add" ? `${icon("add", "icon-sm")} ${label}` : label;
+      return `<span class="${cls}" data-id="${id}" data-mode="${mode}" title="${title}">${text}</span>`;
+    }
+
+    function updatePipelineHint() {
+      const hint = document.getElementById("pipeline-hint");
+      if (!hint) return;
+      hint.innerHTML = "블록을 클릭해 에이전트를 끄고, <strong>+ 추가</strong>로 다시 넣을 수 있습니다.";
+    }
+
+    function bindPipelineClicks(flow, agents) {
+      flow.querySelectorAll(".pipe-block").forEach((el) => {
+        el.addEventListener("click", () => {
+          if (el.dataset.locked === "1") return;
+          const id = el.dataset.id;
+          if (el.dataset.mode === "add") {
+            const order = agents.map((b) => b.id);
+            const list = currentPipeline.agents || [];
+            if (!list.includes(id)) {
+              currentPipeline.agents = [...list, id].sort(
+                (a, b) => order.indexOf(a) - order.indexOf(b),
+              );
+            }
+            renderPipeline();
+            return;
+          }
+          togglePipelineBlock(id);
+        });
+      });
+    }
+
+    function joinPipeBlocks(blocks, arrow, mapHtml) {
+      return blocks.map(mapHtml).join(arrow);
+    }
+
+    function renderPicturePipeline(flow, schema) {
+      const arrow = '<span class="pipe-arrow">→</span>';
+      const setup = schema.setup_picture;
+      const extra = schema.extra_picture;
+      const finish = schema.finish;
+      const pageAgents = schema.agents_picture;
+      const setupBlocks = joinPipeBlocks(
+        setup,
+        arrow,
+        (b) => pipeBlockHtml(b.id, b.label, isBlockEnabled(b.id)),
+      );
+      const enabledPage = pageAgents.filter((b) => isBlockEnabled(b.id));
+      const disabledPage = pageAgents.filter((b) => !isBlockEnabled(b.id));
+      const pageBlocks = enabledPage.length
+        ? joinPipeBlocks(enabledPage, arrow, (b) => pipeBlockHtml(b.id, b.label, true))
+        : '<span class="hint">에이전트 없음 — 아래에서 추가</span>';
+      const pagePalette = disabledPage.map((b) => pipeBlockHtml(b.id, b.label, false, "add")).join("");
+      const extraBlocks = joinPipeBlocks(
+        extra,
+        arrow,
+        (b) => pipeBlockHtml(b.id, b.label, isBlockEnabled(b.id)),
+      );
+      const finishBlocks = joinPipeBlocks(
+        finish,
+        arrow,
+        (b) => pipeBlockHtml(b.id, b.label, isBlockEnabled(b.id)),
+      );
+
+      flow.innerHTML = `
+        <div class="pipe-zone">
+          <div class="pipe-zone-label with-icon">${icon("settings", "icon-sm")} 준비</div>
+          <div class="pipe-zone-blocks">${setupBlocks}</div>
+        </div>
+        <div class="pipe-zone pipe-zone-loop">
+          <div class="pipe-zone-label with-icon">${icon("repeat", "icon-sm")} 페이지마다 반복</div>
+          <div class="pipe-zone-blocks">${pageBlocks}</div>
+          ${disabledPage.length ? `<div class="pipe-palette"><span class="pipe-palette-label with-icon">${icon("add_circle", "icon-sm")} 추가</span>${pagePalette}</div>` : ""}
+        </div>
+        ${extra.length ? `<div class="pipe-zone"><div class="pipe-zone-label with-icon">${icon("image", "icon-sm")} 이미지</div><div class="pipe-zone-blocks">${extraBlocks}</div></div>` : ""}
+        <div class="pipe-zone">
+          <div class="pipe-zone-label with-icon">${icon("picture_as_pdf", "icon-sm")} 마무리</div>
+          <div class="pipe-zone-blocks">${finishBlocks}</div>
+        </div>
+      `;
+      bindPipelineClicks(flow, pageAgents);
+    }
+
+    function renderTextPipeline(flow, schema) {
+      const arrow = '<span class="pipe-arrow">→</span>';
+      const setup = schema.setup_text;
+      const agents = schema.agents_text;
+      const finish = schema.finish;
+      const setupBlocks = joinPipeBlocks(
+        setup,
+        arrow,
+        (b) => pipeBlockHtml(b.id, b.label, isBlockEnabled(b.id)),
+      );
+      const enabledAgents = agents.filter((b) => isBlockEnabled(b.id));
+      const disabledAgents = agents.filter((b) => !isBlockEnabled(b.id));
+      const loopBlocks = enabledAgents.length
+        ? joinPipeBlocks(enabledAgents, arrow, (b) => pipeBlockHtml(b.id, b.label, true))
+        : '<span class="hint">에이전트 없음 — 아래에서 추가</span>';
+      const palette = disabledAgents.map((b) => pipeBlockHtml(b.id, b.label, false, "add")).join("");
+      const finishBlocks = joinPipeBlocks(
+        finish,
+        arrow,
+        (b) => pipeBlockHtml(b.id, b.label, isBlockEnabled(b.id)),
+      );
+
+      flow.innerHTML = `
+        <div class="pipe-zone">
+          <div class="pipe-zone-label with-icon">${icon("settings", "icon-sm")} 준비</div>
+          <div class="pipe-zone-blocks">${setupBlocks}</div>
+        </div>
+        <div class="pipe-zone pipe-zone-loop">
+          <div class="pipe-zone-label with-icon">${icon("repeat", "icon-sm")} 장마다 반복</div>
+          <div class="pipe-zone-blocks">${loopBlocks}</div>
+          ${disabledAgents.length ? `<div class="pipe-palette"><span class="pipe-palette-label with-icon">${icon("add_circle", "icon-sm")} 추가</span>${palette}</div>` : ""}
+        </div>
+        <div class="pipe-zone">
+          <div class="pipe-zone-label with-icon">${icon("picture_as_pdf", "icon-sm")} 마무리</div>
+          <div class="pipe-zone-blocks">${finishBlocks}</div>
+        </div>
+      `;
+      bindPipelineClicks(flow, agents);
+    }
+
+    function renderPipeline() {
+      const flow = document.getElementById("pipeline-flow");
+      if (!currentPipeline) {
+        flow.innerHTML = '<span class="hint">파이프라인 준비 중...</span>';
+        return;
+      }
+      const schema = getPipelineSchema();
+      const bookType = getBookTypeFromToc();
+      updateBookTypeDependentUi(bookType);
+      if (isPictureBookType(bookType)) {
+        renderPicturePipeline(flow, schema);
+      } else {
+        renderTextPipeline(flow, schema);
+      }
+      updatePipelineHint();
+    }
+
+    function resetPipeline() {
+      applyPipeline(null, getBookTypeFromToc());
+      const status = document.getElementById("pipeline-status");
+      status.textContent = "기본 파이프라인으로 복원했습니다.";
+      status.style.color = "var(--muted)";
+    }
+
+    function applyPipeline(pipeline, bookType) {
+      const bt = bookType || getBookTypeFromToc();
+      if (isPictureBookType(bt)) {
+        currentPipeline = ensurePicturePipeline(
+          pipeline || defaultPipelineForType("picture"),
+        );
+      } else if (pipeline) {
+        currentPipeline = JSON.parse(JSON.stringify(pipeline));
+      } else {
+        currentPipeline = defaultPipelineForType("text");
+      }
+      updateBookTypeDependentUi(bt);
+      renderPipeline();
+    }
+
+    async function loadPipelineSchema() {
+      try {
+        pipelineSchema = await api("/api/pipeline/schema");
+      } catch (err) {
+        console.warn("[pipeline] API unavailable, using built-in defaults:", err.message);
+        pipelineSchema = null;
+      }
+      if (!currentPipeline) {
+        applyPipeline(null, document.getElementById("book-type").value);
+      } else {
+        renderPipeline();
+      }
+    }
+
+    function ensureWorkflowVisible() {
+      const tocSel = document.getElementById("toc-file");
+      if (tocSel.value && !currentJobId) {
+        syncFromTocFile();
+      } else if (!currentJobId) {
+        showWorkflowState("idle");
+      }
+    }
+
+    async function fetchTocContent(path) {
+      const norm = normalizeTocPath(path);
+      try {
+        return await api(`/api/toc/content?path=${encodeURIComponent(norm)}`);
+      } catch {
+        const res = await fetch(`/api/toc/export?path=${encodeURIComponent(norm)}`);
+        if (!res.ok) {
+          throw new Error("목차를 불러올 수 없습니다. python run_ui.py 재시작 후 F5");
+        }
+        const toc = await res.json();
+        const isPicture = toc.type === "picture_book" || Array.isArray(toc.pages);
+        const bookType = isPicture ? "picture" : "text";
+        if (!toc.pipeline) {
+          toc.pipeline = defaultPipelineForType(bookType);
+        }
+        const items = toc.pages || toc.chapters || [];
+        return {
+          path: norm,
+          filename: norm.split("/").pop(),
+          type: isPicture ? "picture_book" : "text_book",
+          count: items.length,
+          unit: isPicture ? "pages" : "chapters",
+          toc,
+        };
+      }
+    }
+
+    async function openTocModal() {
+      const path = document.getElementById("toc-file").value;
+      if (!path) {
+        alert("목차 파일을 먼저 선택하거나 생성하세요.");
+        return;
+      }
+      const modal = document.getElementById("toc-modal");
+      if (!modal) {
+        alert("목차 모달을 찾을 수 없습니다. 브라우저를 F5로 새로고침하세요.");
+        return;
+      }
+      modal.classList.add("open");
+      await loadTocIntoModal(path);
+    }
+
+    function closeTocModal() {
+      document.getElementById("toc-modal")?.classList.remove("open");
+    }
+
+    async function loadTocIntoModal(path) {
+      const status = document.getElementById("toc-modal-status");
+      status.textContent = "불러오는 중...";
+      status.style.color = "";
+      try {
+        const data = await fetchTocContent(path);
+        tocEditPath = normalizeTocPath(data.path || path);
+        tocEditData = JSON.parse(JSON.stringify(data.toc));
+        tocEditBookType = data.type === "picture_book" ? "picture" : "text";
+        document.getElementById("toc-modal-file").textContent = data.filename || tocEditPath;
+        document.getElementById("toc-edit-title").value = tocEditData.title || "";
+        document.getElementById("toc-edit-desc").value = tocEditData.description || "";
+        const picMeta = document.getElementById("toc-edit-picture-meta");
+        picMeta.style.display = tocEditBookType === "picture" ? "block" : "none";
+        if (tocEditBookType === "picture") {
+          document.getElementById("toc-edit-style").value = tocEditData.style || "";
+          document.getElementById("toc-edit-age").value = tocEditData.target_age || "";
+          document.getElementById("toc-edit-items-label").textContent = "페이지 목록";
+        } else {
+          document.getElementById("toc-edit-items-label").textContent = "장 목록";
+        }
+        renderTocEditItems();
+        status.textContent = "";
+      } catch (err) {
+        status.textContent = err.message;
+        status.style.color = "var(--red)";
+      }
+    }
+
+    function renderTocEditItems() {
+      const list = document.getElementById("toc-edit-items");
+      const isPicture = tocEditBookType === "picture";
+      const items = isPicture ? (tocEditData.pages || []) : (tocEditData.chapters || []);
+      list.innerHTML = items.map((item, idx) => {
+        const primary = isPicture
+          ? `<input type="text" data-idx="${idx}" data-field="scene" value="${escHtml(item.scene || "")}" placeholder="장면 설명">`
+          : `<input type="text" data-idx="${idx}" data-field="title" value="${escHtml(item.title || "")}" placeholder="장 제목">`;
+        const secondary = isPicture
+          ? `<textarea data-idx="${idx}" data-field="mood" rows="2" placeholder="분위기">${escHtml(item.mood || "")}</textarea>`
+          : `<textarea data-idx="${idx}" data-field="description" rows="2" placeholder="이 장에서 다룰 내용">${escHtml(item.description || "")}</textarea>`;
+        return `
+          <div class="toc-item-row" data-idx="${idx}">
+            <span class="toc-item-num">${idx + 1}</span>
+            <div>
+              ${primary}
+              ${secondary}
+            </div>
+            <div class="toc-item-actions">
+              <button type="button" class="toc-item-up" data-idx="${idx}" title="위로">${icon("arrow_upward")}</button>
+              <button type="button" class="toc-item-down" data-idx="${idx}" title="아래로">${icon("arrow_downward")}</button>
+              <button type="button" class="toc-item-del" data-idx="${idx}" title="삭제">${icon("delete")}</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      list.querySelectorAll("input, textarea").forEach((el) => {
+        el.addEventListener("input", () => syncTocEditFromForm());
+      });
+      list.querySelectorAll(".toc-item-up").forEach((btn) => {
+        btn.addEventListener("click", () => moveTocItem(Number(btn.dataset.idx), -1));
+      });
+      list.querySelectorAll(".toc-item-down").forEach((btn) => {
+        btn.addEventListener("click", () => moveTocItem(Number(btn.dataset.idx), 1));
+      });
+      list.querySelectorAll(".toc-item-del").forEach((btn) => {
+        btn.addEventListener("click", () => deleteTocItem(Number(btn.dataset.idx)));
+      });
+    }
+
+    function syncTocEditFromForm() {
+      if (!tocEditData) return;
+      const isPicture = tocEditBookType === "picture";
+      const key = isPicture ? "pages" : "chapters";
+      const items = [];
+      document.querySelectorAll("#toc-edit-items .toc-item-row").forEach((row, idx) => {
+        if (isPicture) {
+          items.push({
+            number: idx + 1,
+            scene: row.querySelector('[data-field="scene"]')?.value.trim() || "",
+            mood: row.querySelector('[data-field="mood"]')?.value.trim() || "",
+          });
+        } else {
+          items.push({
+            number: idx + 1,
+            title: row.querySelector('[data-field="title"]')?.value.trim() || "",
+            description: row.querySelector('[data-field="description"]')?.value.trim() || "",
+          });
+        }
+      });
+      tocEditData[key] = items;
+    }
+
+    function moveTocItem(idx, dir) {
+      syncTocEditFromForm();
+      const key = tocEditBookType === "picture" ? "pages" : "chapters";
+      const items = tocEditData[key];
+      const newIdx = idx + dir;
+      if (newIdx < 0 || newIdx >= items.length) return;
+      [items[idx], items[newIdx]] = [items[newIdx], items[idx]];
+      renderTocEditItems();
+    }
+
+    function deleteTocItem(idx) {
+      syncTocEditFromForm();
+      const key = tocEditBookType === "picture" ? "pages" : "chapters";
+      if (tocEditData[key].length <= 1) {
+        alert("최소 1개 항목은 필요합니다.");
+        return;
+      }
+      tocEditData[key].splice(idx, 1);
+      renderTocEditItems();
+    }
+
+    function addTocItem() {
+      syncTocEditFromForm();
+      const key = tocEditBookType === "picture" ? "pages" : "chapters";
+      const n = tocEditData[key].length + 1;
+      if (tocEditBookType === "picture") {
+        tocEditData[key].push({ number: n, scene: `Page ${n}`, mood: "warm" });
+      } else {
+        tocEditData[key].push({ number: n, title: `Chapter ${n}`, description: "" });
+      }
+      renderTocEditItems();
+    }
+
+    async function saveTocModal() {
+      if (!tocEditPath || !tocEditData) return;
+      syncTocEditFromForm();
+      const status = document.getElementById("toc-modal-status");
+      status.textContent = "저장 중...";
+      status.style.color = "";
+
+      tocEditData.title = document.getElementById("toc-edit-title").value.trim();
+      tocEditData.description = document.getElementById("toc-edit-desc").value.trim();
+      if (tocEditBookType === "picture") {
+        tocEditData.style = document.getElementById("toc-edit-style").value.trim();
+        tocEditData.target_age = document.getElementById("toc-edit-age").value.trim();
+      }
+      if (currentPipeline) {
+        tocEditData.pipeline = tocEditBookType === "picture"
+          ? ensurePicturePipeline(currentPipeline)
+          : JSON.parse(JSON.stringify(currentPipeline));
+      }
+
+      try {
+        const result = await api("/api/toc/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: tocEditPath, toc: tocEditData }),
+        });
+        if (result.pipeline) {
+          tocPipelineMap[result.path] = result.pipeline;
+          applyPipeline(result.pipeline, tocEditBookType);
+        }
+        await loadTocFiles(result.path);
+        document.getElementById("gen-title").value = result.title;
+        showPipelinePanel({
+          title: result.title,
+          filename: result.filename,
+          count: result.count,
+          unit: result.unit,
+          path: result.path,
+        });
+        status.textContent = "저장되었습니다.";
+        status.style.color = "var(--green)";
+        setTimeout(closeTocModal, 600);
+      } catch (err) {
+        status.textContent = err.message;
+        status.style.color = "var(--red)";
+      }
+    }
+
+    async function savePipelineToToc() {
+      const path = document.getElementById("toc-file").value;
+      const status = document.getElementById("pipeline-status");
+      if (!path) {
+        status.textContent = "저장할 목차 파일을 먼저 선택하세요.";
+        status.style.color = "var(--red)";
+        return;
+      }
+      const bookType = getBookTypeFromToc();
+      if (isPictureBookType(bookType)) {
+        currentPipeline = ensurePicturePipeline(currentPipeline);
+      }
+      status.textContent = "저장 중...";
+      status.style.color = "";
+      try {
+        const result = await api("/api/toc/pipeline", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path, pipeline: currentPipeline }),
+        });
+        if (result.pipeline) {
+          applyPipeline(result.pipeline, bookType);
+          tocPipelineMap[path] = JSON.parse(JSON.stringify(currentPipeline));
+        }
+        status.textContent = "목차 파일에 파이프라인이 저장되었습니다.";
+        status.style.color = "var(--green)";
+        return true;
+      } catch (err) {
+        status.textContent = err.message;
+        status.style.color = "var(--red)";
+        return false;
+      }
+    }
+
+    async function syncFromTocFile() {
+      const toc = document.getElementById("toc-file");
+      const opt = toc.selectedOptions[0];
+      const path = toc.value;
+      if (!path) {
+        if (!currentJobId) showWorkflowState("idle");
+        return;
+      }
+      let bookType = opt?.dataset?.type
+        || (tocFileMetaMap[path]?.type === "picture_book" ? "picture" : "text");
+      let pipeline = tocPipelineMap[path];
+
+      try {
+        const content = await fetchTocContent(path);
+        bookType = bookTypeFromTocData(content.toc);
+        if (content.toc?.pipeline) {
+          pipeline = isPictureBookType(bookType)
+            ? ensurePicturePipeline(content.toc.pipeline)
+            : content.toc.pipeline;
+          tocPipelineMap[path] = JSON.parse(JSON.stringify(pipeline));
+        }
+      } catch (err) {
+        console.warn("[pipeline] TOC refresh failed, using cached pipeline:", err.message);
+      }
+
+      applyPipeline(pipeline || null, bookType);
+      if (!currentJobId) {
+        const meta = tocFileMetaMap[path] || {};
+        showPipelinePanel({
+          title: meta.title || opt?.textContent?.trim() || "목차",
+          filename: meta.name,
+          count: meta.count,
+          unit: meta.unit,
+          path,
+        });
+      }
+    }
+
+    async function loadTocFiles(selectPath) {
+      const files = await api("/api/toc-files");
+      tocPipelineMap = {};
+      tocFileMetaMap = {};
+      const normalized = files.map((f) => {
+        const path = normalizeTocPath(f.path);
+        const bookType = f.type === "picture_book" ? "picture" : "text";
+        return {
+          ...f,
+          path,
+          pipeline: bookType === "picture"
+            ? ensurePicturePipeline(f.pipeline || defaultPipelineForType("picture"))
+            : (f.pipeline || defaultPipelineForType(bookType)),
+        };
+      });
+      normalized.forEach((f) => {
+        tocPipelineMap[f.path] = f.pipeline;
+        tocFileMetaMap[f.path] = f;
+      });
+      const sel = document.getElementById("toc-file");
+      if (!normalized.length) {
+        sel.innerHTML = '<option value="">목차 파일 없음</option>';
+        if (!currentJobId) showWorkflowState("idle");
+        return;
+      }
+      sel.innerHTML = normalized.map(f =>
+        `<option value="${escAttr(f.path)}" data-type="${f.type === "picture_book" ? "picture" : "text"}">
+          ${escHtml(f.title)} (${f.count} ${f.unit || f.type})
+        </option>`
+      ).join("");
+      if (selectPath) {
+        sel.value = normalizeTocPath(selectPath);
+      }
+      if (!sel.value && sel.options.length) {
+        sel.selectedIndex = 0;
+      }
+      syncFromTocFile();
+    }
+
+    let tocGenMonitorTimer = null;
+    let tocGenStartedAt = 0;
+    let tocGenLoadingEndedSec = 0;
+    let tocGenLastPhase = "waiting";
+    let textModelMeta = {};
+
+    const TOC_GEN_HISTORY_KEY = "bookAgentTocGenHistory";
+
+    function getSelectedModelMeta(model) {
+      if (textModelMeta[model]) return textModelMeta[model];
+      const opt = [...document.getElementById("text-model").options]
+        .find((o) => o.value === model);
+      const m = opt?.textContent?.match(/\(([\d.]+)\s*GB\)/);
+      return { name: model, size_gb: m ? Number(m[1]) : 8 };
+    }
+
+    function formatDuration(sec) {
+      const s = Math.max(0, Math.round(sec));
+      if (s < 60) return `${s}초`;
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return r ? `${m}분 ${r}초` : `${m}분`;
+    }
+
+    function getTocGenerateTimeoutMs(model) {
+      const est = getTocGenEstimates(model);
+      // 서버는 최대 3회 재시도; 큰 모델+SSH 터널 여유 포함
+      return Math.max(600000, (est.loadSec + est.genSec + 120) * 3 * 1000);
+    }
+
+    function getTocGenEstimates(model) {
+      const meta = getSelectedModelMeta(model);
+      const sizeGb = meta.size_gb || 8;
+      const hist = JSON.parse(localStorage.getItem(TOC_GEN_HISTORY_KEY) || "{}")[model];
+      if (hist?.n >= 1) {
+        return {
+          loadSec: hist.load,
+          genSec: hist.gen,
+          source: "이전 실행 기록",
+        };
+      }
+      return {
+        loadSec: Math.max(20, Math.min(180, Math.round(12 + sizeGb * 6))),
+        genSec: Math.max(15, Math.min(120, Math.round(10 + sizeGb * 3))),
+        source: "모델 크기 추정",
+      };
+    }
+
+    function saveTocGenHistory(model, loadSec, genSec) {
+      try {
+        const all = JSON.parse(localStorage.getItem(TOC_GEN_HISTORY_KEY) || "{}");
+        const prev = all[model] || { load: 0, gen: 0, n: 0 };
+        const n = prev.n + 1;
+        all[model] = {
+          load: Math.round((prev.load * prev.n + loadSec) / n),
+          gen: Math.round((prev.gen * prev.n + genSec) / n),
+          n,
+        };
+        localStorage.setItem(TOC_GEN_HISTORY_KEY, JSON.stringify(all));
+      } catch (_) { /* ignore */ }
+    }
+
+    function buildTocGenEta(phaseKey, model, sec, estimates) {
+      const { loadSec, genSec, source } = estimates;
+      if (phaseKey === "waiting") {
+        return `예상 전체 <strong>${formatDuration(loadSec + genSec)}</strong> (${source})`;
+      }
+      if (phaseKey === "loading") {
+        const remain = Math.max(0, loadSec - sec);
+        return `로딩 예상 <strong>${formatDuration(loadSec)}</strong> · 남은 ~${formatDuration(remain)} (${source})`;
+      }
+      if (phaseKey === "generating") {
+        const genElapsed = Math.max(0, sec - tocGenLoadingEndedSec);
+        const remain = Math.max(0, genSec - genElapsed);
+        return `생성 예상 <strong>${formatDuration(genSec)}</strong> · 남은 ~${formatDuration(remain)} (${source})`;
+      }
+      if (phaseKey === "saving") {
+        return "목차 파일 저장 중…";
+      }
+      return "";
+    }
+
+    function tocGenProgressPct(phaseKey, sec, estimates) {
+      const { loadSec, genSec } = estimates;
+      if (phaseKey === "waiting") return 5;
+      if (phaseKey === "loading") {
+        return Math.min(48, 8 + (sec / Math.max(loadSec, 1)) * 40);
+      }
+      if (phaseKey === "generating") {
+        const genElapsed = Math.max(0, sec - tocGenLoadingEndedSec);
+        return Math.min(92, 50 + (genElapsed / Math.max(genSec, 1)) * 42);
+      }
+      if (phaseKey === "saving") return 96;
+      return 8;
+    }
+
+    function updateTocGenStatus(phaseKey, model, sec) {
+      if (phaseKey === "generating" && tocGenLastPhase === "loading") {
+        tocGenLoadingEndedSec = sec;
+      }
+      tocGenLastPhase = phaseKey;
+
+      const estimates = getTocGenEstimates(model);
+      const phaseEl = document.getElementById("toc-gen-phase");
+      const detailEl = document.getElementById("toc-gen-detail");
+      const etaEl = document.getElementById("toc-gen-eta");
+      const progress = document.getElementById("toc-gen-progress");
+      const status = document.getElementById("gen-toc-status");
+
+      const phaseMeta = {
+        waiting: { icon: "send", title: "요청 전송 중", detail: "선택한 모델로 목차 생성을 시작합니다", cls: "" },
+        loading: { icon: "memory", title: `${model} 로딩 중`, detail: "가중치를 GPU/메모리에 올리는 중입니다", cls: "phase-loading" },
+        generating: { icon: "auto_awesome", title: `${model} 생성 중`, detail: "목차 JSON을 작성하고 있습니다", cls: "phase-generating" },
+        saving: { icon: "save", title: "저장 중", detail: "목차 파일을 저장합니다", cls: "phase-generating" },
+      };
+      const p = phaseMeta[phaseKey] || phaseMeta.loading;
+
+      if (phaseEl) {
+        phaseEl.className = `toc-gen-phase with-icon ${p.cls}`.trim();
+        phaseEl.innerHTML = `${icon(p.icon)} ${p.title}<span class="toc-gen-timer"> · ${sec}초</span>`;
+      }
+      if (detailEl) detailEl.textContent = p.detail;
+      if (etaEl) {
+        etaEl.innerHTML = buildTocGenEta(phaseKey, model, sec, estimates)
+          + (phaseKey !== "saving" ? ' <span class="hint">(Ollama ETA 미제공 · 추정치)</span>' : "");
+      }
+      if (progress) progress.style.width = `${tocGenProgressPct(phaseKey, sec, estimates)}%`;
+      if (status) {
+        status.textContent = `${p.title} · ${sec}초`;
+        status.style.color = "";
+      }
+    }
+
+    async function pollTocGenPhase(model, elapsedSec) {
+      if (elapsedSec < 2) return "waiting";
+      try {
+        const data = await api(
+          `/api/models/running?model=${encodeURIComponent(model)}`,
+          {},
+          5000,
+        );
+        if (!data.online) return "loading";
+        return data.running ? "generating" : "loading";
+      } catch {
+        return elapsedSec < 10 ? "loading" : "generating";
+      }
+    }
+
+    function startTocGenMonitor(model) {
+      tocGenStartedAt = Date.now();
+      tocGenLoadingEndedSec = 0;
+      tocGenLastPhase = "waiting";
+      const t0 = tocGenStartedAt;
+      stopTocGenMonitor();
+      updateTocGenStatus("waiting", model, 0);
+      tocGenMonitorTimer = setInterval(async () => {
+        const sec = Math.floor((Date.now() - t0) / 1000);
+        const phase = await pollTocGenPhase(model, sec);
+        updateTocGenStatus(phase, model, sec);
+      }, 1500);
+    }
+
+    function stopTocGenMonitor() {
+      if (tocGenMonitorTimer) {
+        clearInterval(tocGenMonitorTimer);
+        tocGenMonitorTimer = null;
+      }
+    }
+
+    async function generateToc() {
+      const textModel = document.getElementById("text-model").value;
+      if (!textModel) {
+        alert("텍스트 모델을 먼저 선택하세요. (Ollama SSH 터널 확인)");
+        return;
+      }
+      const title = document.getElementById("gen-title").value.trim();
+      const topic = document.getElementById("gen-topic").value.trim();
+      if (!title || !topic) {
+        alert("책 제목과 주제/줄거리를 입력하세요.");
+        return;
+      }
+      if (!currentPipeline) {
+        applyPipeline(null, document.getElementById("book-type").value);
+      }
+
+      const btn = document.getElementById("btn-generate-toc");
+      const status = document.getElementById("gen-toc-status");
+      btn.disabled = true;
+      status.textContent = "목차 생성 준비 중...";
+      status.style.color = "";
+      showWorkflowState("toc-gen");
+      startTocGenMonitor(textModel);
+
+      try {
+        const result = await api("/api/toc/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            book_type: document.getElementById("book-type").value,
+            title,
+            topic,
+            count: Number(document.getElementById("gen-count").value) || 5,
+            language: document.getElementById("gen-language").value,
+            target_age: document.getElementById("gen-age").value.trim() || "3-5",
+            extra_notes: document.getElementById("gen-notes").value.trim(),
+            text_model: textModel,
+            pipeline: currentPipeline,
+          }),
+        }, getTocGenerateTimeoutMs(textModel));
+        const totalSec = Math.floor((Date.now() - tocGenStartedAt) / 1000);
+        const loadSec = tocGenLoadingEndedSec || Math.min(totalSec, getTocGenEstimates(textModel).loadSec);
+        const genSec = Math.max(1, totalSec - loadSec);
+        saveTocGenHistory(textModel, loadSec, genSec);
+        stopTocGenMonitor();
+        updateTocGenStatus("saving", textModel, totalSec);
+        const genBookType = document.getElementById("book-type").value;
+        if (result.toc?.pipeline) {
+          applyPipeline(result.toc.pipeline, genBookType);
+        } else {
+          applyPipeline(null, genBookType);
+        }
+        await loadTocFiles(result.path);
+        status.textContent = `저장됨: ${result.filename}`;
+        status.style.color = "var(--green)";
+        showPipelinePanel({
+          title: result.title,
+          filename: result.filename,
+          count: result.count,
+          unit: result.unit,
+          path: result.path,
+        });
+      } catch (err) {
+        const msg = err.message || "목차 생성에 실패했습니다.";
+        status.textContent = msg;
+        status.style.color = "var(--red)";
+        alert(`목차 생성 실패\n\n${msg}`);
+        const path = document.getElementById("toc-file").value;
+        if (path) {
+          syncFromTocFile();
+        } else {
+          showWorkflowState("idle");
+        }
+      } finally {
+        stopTocGenMonitor();
+        btn.disabled = false;
+      }
+    }
+
+    function pickDefaultTextModel(models) {
+      const exact = models.find(m => m.name === "gemma4:31b");
+      if (exact) return exact.name;
+      const gemma4 = models.find(m => m.name.toLowerCase().startsWith("gemma4"));
+      if (gemma4) return gemma4.name;
+      return models[0]?.name || "";
+    }
+
+    async function loadTextModels() {
+      const sel = document.getElementById("text-model");
+      try {
+        const data = await api("/api/models/text", {}, 10000);
+        const prev = sel.value;
+        if (!data.online || !data.models.length) {
+          sel.innerHTML = '<option value="">Ollama 연결 안 됨 (SSH 터널 확인)</option>';
+          return;
+        }
+        textModelMeta = {};
+        data.models.forEach((m) => { textModelMeta[m.name] = m; });
+        sel.innerHTML = data.models.map(m =>
+          `<option value="${m.name}">${m.name} (${m.size_gb} GB)</option>`
+        ).join("");
+        const defaultModel = pickDefaultTextModel(data.models);
+        if (prev && data.models.some(m => m.name === prev)) {
+          sel.value = prev;
+        } else if (defaultModel) {
+          sel.value = defaultModel;
+        }
+      } catch (err) {
+        sel.innerHTML = `<option value="">불러오기 실패 — ${err.message}</option>`;
+      }
+    }
+
+    function exportToc() {
+      const path = document.getElementById("toc-file").value;
+      const status = document.getElementById("toc-io-status");
+      if (!path) {
+        status.textContent = "보낼 목차 파일을 선택하세요.";
+        status.style.color = "var(--red)";
+        return;
+      }
+      window.open(`/api/toc/export?path=${encodeURIComponent(path)}`, "_blank");
+      status.textContent = "다운로드 시작";
+      status.style.color = "var(--green)";
+    }
+
+    async function importToc(file) {
+      const status = document.getElementById("toc-io-status");
+      status.textContent = "가져오는 중...";
+      status.style.color = "";
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/toc/import", { method: "POST", body: form });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || res.statusText);
+      }
+      const result = await res.json();
+      await loadTocFiles(result.path);
+      status.textContent = `가져옴: ${result.filename}`;
+      status.style.color = "var(--green)";
+      const importType = result.type === "picture_book" ? "picture" : "text";
+      if (result.pipeline) {
+        applyPipeline(result.pipeline, importType);
+      }
+      showPipelinePanel({
+        title: result.title,
+        filename: result.filename,
+        count: result.count,
+        unit: result.unit,
+        path: result.path,
+      });
+    }
+
+    async function loadImageModels() {
+      const backend = document.getElementById("image-backend").value;
+      const data = await api(`/api/models/image?backend=${backend}`);
+      const sel = document.getElementById("image-model");
+      if (!data.models.length) {
+        const msg = !data.online
+          ? "Forge 연결 안 됨 (webui-user.bat 실행 확인)"
+          : "체크포인트 없음 — 모델 관리에서 다운로드";
+        sel.innerHTML = `<option value="">${msg}</option>`;
+        return;
+      }
+      sel.innerHTML = '<option value="">Forge 현재 선택</option>' +
+        data.models.map(m => `<option value="${m.name}">${m.title || m.name}</option>`).join("");
+    }
+
+    function fileServeUrl(path, download = false) {
+      const q = new URLSearchParams({ path });
+      if (download) q.set("download", "true");
+      return `/api/files/serve?${q.toString()}`;
+    }
+
+    function downloadPdf(path, filename) {
+      if (!path) return;
+      const a = document.createElement("a");
+      a.href = fileServeUrl(path, true);
+      a.download = filename || path.split(/[/\\]/).pop() || "book.pdf";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function renderPdfDownload(path, filename) {
+      if (!path) return "";
+      const label = filename || path.split(/[/\\]/).pop();
+      return `<button type="button" class="secondary with-icon btn-pdf-download" data-pdf-path="${encodeURIComponent(path)}" data-pdf-name="${label}">
+        ${icon("download")} PDF
+      </button>`;
+    }
+
+    function bindPdfDownloadButtons(root = document) {
+      root.querySelectorAll(".btn-pdf-download").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          downloadPdf(
+            decodeURIComponent(btn.dataset.pdfPath || ""),
+            btn.dataset.pdfName || "book.pdf",
+          );
+        });
+      });
+    }
+
+    async function previewPdf(pdfPath, outputDir = "") {
+      if (!pdfPath) return;
+      const filename = pdfPath.split(/[/\\]/).pop();
+      const preview = document.getElementById("preview-content");
+      const card = document.getElementById("preview-card");
+      card.style.display = "block";
+      preview.innerHTML = `
+        <p class="hint">${filename}</p>
+        <div class="pdf-actions">${renderPdfDownload(pdfPath, filename)}</div>
+        <iframe class="pdf-preview-frame" title="PDF 미리보기"
+          src="${fileServeUrl(pdfPath)}#toolbar=1&navpanes=0"></iframe>
+      `;
+      bindPdfDownloadButtons(preview);
+      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (outputDir) await viewOutputExtras(outputDir);
+    }
+
+    async function viewOutputExtras(outputDir) {
+      const files = await api(`/api/outputs/files?path=${encodeURIComponent(outputDir)}`);
+      const images = files
+        .filter((f) => ["png", "jpg", "jpeg", "webp"].includes(f.type))
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      const preview = document.getElementById("preview-content");
+      if (!images.length) return;
+
+      const thumbs = images.map((img) =>
+        `<img src="${fileServeUrl(img.path)}" alt="${img.name}" title="${img.name}"
+          onclick="document.querySelector('.pdf-preview-frame')?.scrollIntoView({behavior:'smooth'})">`
+      ).join("");
+      preview.insertAdjacentHTML(
+        "beforeend",
+        `<p class="hint" style="margin-top:1rem">페이지 이미지 (${images.length}장)</p>
+         <div class="preview-thumb-grid">${thumbs}</div>`,
+      );
+    }
+
+    async function showJobPdfResult(job) {
+      const el = document.getElementById("job-pdf-result");
+      if (!el) return;
+      el.classList.remove("failed");
+      el.style.display = "none";
+      el.innerHTML = "";
+
+      if (job.status === "running") return;
+
+      if (job.status !== "completed") {
+        el.classList.add("failed");
+        el.style.display = "block";
+        el.innerHTML = `<strong>작업 종료: ${job.status}</strong>
+          <p class="hint">로그를 확인하세요. PDF가 없으면 출판 단계 오류일 수 있습니다.</p>`;
+        return;
+      }
+
+      let pdfPath = "";
+      let pdfName = "";
+      try {
+        const files = await api(`/api/outputs/files?path=${encodeURIComponent(job.output_dir)}`);
+        const pdfs = files
+          .filter((f) => f.type === "pdf")
+          .sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+        if (pdfs.length) {
+          pdfPath = pdfs[0].path;
+          pdfName = pdfs[0].name;
+        }
+      } catch (_) { /* ignore */ }
+
+      if (!pdfPath) {
+        el.classList.add("failed");
+        el.style.display = "block";
+        el.innerHTML = `<strong>생성 완료 — PDF 없음</strong>
+          <p class="hint">페이지·이미지는 저장됐을 수 있습니다. 파이프라인에서 「PDF 출판」을 켜고 다시 실행하세요.</p>`;
+        return;
+      }
+
+      el.style.display = "block";
+      el.innerHTML = `
+        <strong>PDF 출판 완료</strong>
+        <p class="hint">${pdfName}</p>
+        <div class="pdf-actions">${renderPdfDownload(pdfPath, pdfName)}</div>
+      `;
+      bindPdfDownloadButtons(el);
+      await previewPdf(pdfPath, job.output_dir);
+    }
+
+    async function loadOutputs() {
+      const outputs = await api("/api/outputs");
+      const el = document.getElementById("outputs-list");
+      if (!outputs.length) {
+        el.innerHTML = '<p class="hint">아직 생성된 책이 없습니다.</p>';
+        return;
+      }
+      el.innerHTML = outputs.map((o) => `
+        <div class="output-item">
+          <strong>${o.name}</strong> <span class="badge">${o.type}</span>
+          <div class="meta">
+            완료: ${o.completed} | 실패: ${o.failed}
+            ${o.type === "picture" ? `| 페이지: ${o.pages} | 그림: ${o.images}` : `| 챕터: ${o.chapters}`}
+            ${o.pdfs ? `| PDF: ${o.pdfs}개` : ""}
+            | ${o.size_mb} MB
+          </div>
+          <div class="output-actions">
+            <button class="secondary with-icon btn-view-output" data-output-path="${encodeURIComponent(o.path)}">
+              ${icon("visibility")} 보기
+            </button>
+            ${o.latest_pdf ? renderPdfDownload(o.latest_pdf, o.latest_pdf_name) : ""}
+            <button class="danger with-icon btn-delete-output" data-output-path="${encodeURIComponent(o.path)}">
+              ${icon("delete")} 삭제
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+      el.querySelectorAll(".btn-view-output").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          viewOutput(decodeURIComponent(btn.dataset.outputPath || ""));
+        });
+      });
+      el.querySelectorAll(".btn-delete-output").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          deleteOutput(decodeURIComponent(btn.dataset.outputPath || ""));
+        });
+      });
+      bindPdfDownloadButtons(el);
+    }
+
+    async function deleteOutput(path) {
+      if (!confirm("정말 삭제할까요? 실행 중인 작업은 중지됩니다. 복구할 수 없습니다.")) return;
+      try {
+        await api("/api/outputs", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path }),
+        });
+        loadOutputs();
+      } catch (err) {
+        alert(err.message || "삭제에 실패했습니다.");
+      }
+    }
+
+    async function viewOutput(path) {
+      const files = await api(`/api/outputs/files?path=${encodeURIComponent(path)}`);
+      const pdfs = files
+        .filter((f) => f.type === "pdf")
+        .sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+      const images = files
+        .filter((f) => ["png", "jpg", "jpeg", "webp"].includes(f.type))
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      const md = files.filter((f) => f.type === "md");
+      const preview = document.getElementById("preview-content");
+      const card = document.getElementById("preview-card");
+      card.style.display = "block";
+
+      if (pdfs.length) {
+        await previewPdf(pdfs[0].path, path);
+        return;
+      }
+
+      let html = `<p class="hint">${path.split(/[/\\]/).pop()}</p>`;
+      if (images.length) {
+        html += `<div class="preview-thumb-grid">${images.map((img) =>
+          `<img src="${fileServeUrl(img.path)}" alt="${img.name}" title="${img.name}">`
+        ).join("")}</div>`;
+      }
+      if (md.length) {
+        html += `<p class="hint">챕터: ${md.map((m) => m.name).join(", ")}</p>`;
+      }
+      if (!images.length && !md.length) {
+        html += `<p class="hint">미리볼 파일이 없습니다. PDF 출판을 실행하세요.</p>`;
+      }
+      preview.innerHTML = html;
+      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    async function startJob() {
+      const textModel = document.getElementById("text-model").value;
+      const tocPath = document.getElementById("toc-file").value;
+      if (!textModel) {
+        alert("텍스트 모델을 선택하세요. Ollama SSH 터널(11434)이 열려 있는지 확인하세요.");
+        return;
+      }
+      if (!tocPath) {
+        alert("목차 파일을 먼저 생성하거나 선택하세요.");
+        return;
+      }
+
+      const bookType = getBookTypeFromToc();
+      if (isPictureBookType(bookType)) {
+        currentPipeline = ensurePicturePipeline(currentPipeline);
+      }
+      const saved = await savePipelineToToc();
+      if (!saved) {
+        alert("파이프라인을 목차에 저장하지 못했습니다. 로그를 확인한 뒤 다시 시도하세요.");
+        return;
+      }
+
+      const rewriteAll = document.getElementById("rewrite-all").checked;
+      const rewriteParts = parseRewriteParts(document.getElementById("rewrite-parts").value);
+      if (rewriteAll && rewriteParts.length) {
+        alert("전체 다시 생성과 특정 번호는 동시에 사용할 수 없습니다.");
+        return;
+      }
+
+      showWorkflowState("job");
+      document.getElementById("job-status").innerHTML = "<strong>시작 중...</strong>";
+      document.getElementById("log-box").textContent = "작업을 시작합니다...";
+      const jobPdf = document.getElementById("job-pdf-result");
+      if (jobPdf) {
+        jobPdf.style.display = "none";
+        jobPdf.innerHTML = "";
+      }
+
+      try {
+        const job = await api("/api/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            book_type: getBookTypeFromToc(),
+            toc_path: tocPath,
+            text_model: textModel,
+            image_backend: document.getElementById("image-backend").value,
+            image_model: document.getElementById("image-model").value,
+            resume: document.getElementById("resume").checked,
+            rewrite_all: rewriteAll,
+            rewrite: rewriteParts.length ? rewriteParts : null,
+            pipeline: currentPipeline,
+          }),
+        });
+
+        currentJobId = job.id;
+        document.getElementById("btn-stop").style.display = "block";
+        pollJob();
+      } catch (err) {
+        alert(err.message);
+        syncFromTocFile();
+      }
+    }
+
+    function formatJobElapsed(startedAt) {
+      if (!startedAt) return "";
+      const sec = Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return m > 0 ? `${m}분 ${s}초` : `${s}초`;
+    }
+
+    function describeJobPhase(job, prog) {
+      const setup = prog.setup_completed || [];
+      const inProg = prog.in_progress;
+      const phase = prog.phase || "";
+      if (inProg === "setup" || phase === "setup" || (job.book_type === "picture" && completedPages(prog) === 0 && setup.length < 2)) {
+        const parts = [];
+        if (setup.includes("style_bible")) parts.push("Style Bible 완료");
+        else parts.push("Style Bible 생성 중");
+        if (setup.includes("storyboard")) parts.push("스토리보드 완료");
+        else if (setup.includes("style_bible")) parts.push("스토리보드 생성 중");
+        return `셋업: ${parts.join(" → ")} (LLM 응답 대기, 큰 모델은 수 분 걸릴 수 있음)`;
+      }
+      if (typeof inProg === "number") {
+        return `페이지 ${inProg} 처리 중 (개요 → 집필 → 퇴고 → 마무리 → 그림 프롬프트 → 이미지)`;
+      }
+      if (inProg === "publish" || phase === "publish") return "PDF 출판 중 (보통 1분 이내)";
+      if (phase === "done") return "PDF 출판 완료";
+      if (phase === "publish_failed") return "PDF 출판 실패 — 로그 확인";
+      return job.book_type === "picture" ? "그림책 생성 진행 중" : "책 생성 진행 중";
+    }
+
+    function completedPages(prog) {
+      return prog.completed?.length || 0;
+    }
+
+    async function refreshJobUi(job) {
+      const prog = job.progress || {};
+      const completed = completedPages(prog);
+      const failed = Object.keys(prog.failed || {}).length;
+      const inProg = prog.in_progress;
+      const elapsed = formatJobElapsed(job.started_at);
+
+      document.getElementById("job-status").innerHTML = `
+        <strong>${job.status}</strong> | 완료: ${completed}페이지 | 실패: ${failed}
+        ${typeof inProg === "number" ? `| 진행: #${inProg}` : ""}
+        ${elapsed ? `| 경과: ${elapsed}` : ""}
+      `;
+      const phaseHint = document.getElementById("job-phase-hint");
+      if (phaseHint) phaseHint.textContent = describeJobPhase(job, prog);
+      if (job.log_file && job.status === "running") {
+        phaseHint.textContent += ` · 전체 로그: ${job.log_file}`;
+      }
+
+      const totalGuess = Math.max(completed + (inProg === "setup" || prog.phase === "setup" ? 0 : 1), 5);
+      let pct = 5;
+      if (prog.phase === "setup" || inProg === "setup") {
+        const setup = prog.setup_completed || [];
+        pct = 5 + (setup.includes("style_bible") ? 8 : 0) + (setup.includes("storyboard") ? 7 : 0);
+      } else if (prog.phase === "publish" || inProg === "publish") {
+        pct = 97;
+      } else if (prog.phase === "done") {
+        pct = 100;
+      } else if (completed > 0) {
+        pct = Math.min(90, 20 + Math.round((completed / totalGuess) * 70));
+      }
+      document.getElementById("progress-fill").style.width = pct + "%";
+
+      const logs = (job.log_tail || []).join("\n");
+      const logBox = document.getElementById("log-box");
+      logBox.textContent = logs || "로그 대기 중...";
+      logBox.scrollTop = logBox.scrollHeight;
+
+      if (job.status !== "running") {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = null;
+        currentJobId = null;
+        document.getElementById("btn-stop").style.display = "none";
+        await showJobPdfResult(job);
+        loadOutputs();
+        syncFromTocFile();
+        return false;
+      }
+      return true;
+    }
+
+    async function attachToRunningJob() {
+      try {
+        const jobs = await api("/api/jobs");
+        const running = jobs.find((j) => j.status === "running");
+        if (!running) return;
+        currentJobId = running.id;
+        showWorkflowState("job");
+        document.getElementById("btn-stop").style.display = "block";
+        await refreshJobUi(running);
+        pollJob();
+      } catch (err) {
+        console.warn("[init] running job:", err);
+      }
+    }
+
+    async function pollJob() {
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(async () => {
+        if (!currentJobId) return;
+        try {
+          const job = await api(`/api/jobs/${currentJobId}`);
+          await refreshJobUi(job);
+        } catch (err) {
+          console.warn("job poll:", err);
+        }
+      }, 2000);
+    }
+
+    let modalLinks = {
+      forge_ui: "http://localhost:7860",
+      civitai: "https://civitai.com",
+      ollama_library: "https://ollama.com/library",
+    };
+
+    function openExternal(url) {
+      if (!url) return;
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    function switchModalTab(tab) {
+      document.querySelectorAll(".modal-tab").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === tab);
+      });
+      document.querySelectorAll(".modal-panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === `panel-${tab}`);
+      });
+    }
+
+    let downloadPollTimer = null;
+
+    function formatCheckpointLabel(item) {
+      const size = item.size_gb ? ` · ${item.size_gb} GB` : "";
+      const base = item.base_model ? ` · ${item.base_model}` : "";
+      const note = item.note ? ` — ${item.note}` : "";
+      return `${item.name}${size}${base}${note}`;
+    }
+
+    async function loadRecommendedCheckpoints() {
+      const sel = document.getElementById("checkpoint-recommended");
+      try {
+        const data = await api("/api/models/checkpoints/recommended");
+        sel.innerHTML = data.items.map(item =>
+          `<option value="${item.version_id}" data-filename="${item.filename}">${formatCheckpointLabel(item)}</option>`
+        ).join("");
+      } catch {
+        sel.innerHTML = '<option value="">추천 목록 불러오기 실패 (UI 서버 재시작)</option>';
+      }
+    }
+
+    async function searchCheckpoints() {
+      const q = document.getElementById("checkpoint-search").value.trim();
+      const sel = document.getElementById("checkpoint-search-results");
+      if (!q) {
+        sel.innerHTML = '<option value="">검색어를 입력하세요</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="">검색 중...</option>';
+      try {
+        const data = await api(`/api/models/checkpoints/search?q=${encodeURIComponent(q)}`);
+        if (!data.items.length) {
+          sel.innerHTML = `<option value="">${data.message || "결과 없음"}</option>`;
+          return;
+        }
+        sel.innerHTML = '<option value="">-- 선택 --</option>' + data.items.map(item =>
+          `<option value="${item.version_id}" data-filename="${item.filename}">${item.name} (${item.version_name || ""}) · ${item.size_gb || "?"} GB · ${item.base_model || ""}</option>`
+        ).join("");
+      } catch (err) {
+        sel.innerHTML = `<option value="">검색 실패: ${err.message}</option>`;
+      }
+    }
+
+    function getSelectedCheckpoint() {
+      const searchSel = document.getElementById("checkpoint-search-results");
+      if (searchSel.value) {
+        const opt = searchSel.selectedOptions[0];
+        return { version_id: Number(searchSel.value), filename: opt.dataset.filename || "" };
+      }
+      const recSel = document.getElementById("checkpoint-recommended");
+      if (recSel.value) {
+        const opt = recSel.selectedOptions[0];
+        return { version_id: Number(recSel.value), filename: opt.dataset.filename || "" };
+      }
+      return null;
+    }
+
+    async function pollCheckpointDownload(taskId) {
+      clearInterval(downloadPollTimer);
+      const progEl = document.getElementById("download-progress");
+      const bar = document.getElementById("download-progress-bar");
+      const statusEl = document.getElementById("download-status-text");
+      const btn = document.getElementById("btn-checkpoint-download");
+      progEl.classList.add("active");
+      btn.disabled = true;
+      statusEl.style.color = "";
+
+      downloadPollTimer = setInterval(async () => {
+        try {
+          const task = await api(`/api/models/checkpoints/download/${taskId}`);
+          bar.value = task.progress_pct || 0;
+          const size = task.total_mb
+            ? `${task.downloaded_mb} / ${task.total_mb} MB`
+            : `${task.downloaded_mb} MB`;
+          statusEl.textContent = `${task.filename}: ${size} (${task.progress_pct || 0}%)`;
+
+          if (task.status === "completed") {
+            clearInterval(downloadPollTimer);
+            statusEl.textContent = `완료: ${task.filename}`;
+            bar.value = 100;
+            btn.disabled = false;
+            await loadModalModels();
+            await loadImageModels();
+            await loadSystem();
+          } else if (task.status === "failed") {
+            clearInterval(downloadPollTimer);
+            statusEl.textContent = `실패: ${task.message}`;
+            statusEl.style.color = "var(--red)";
+            btn.disabled = false;
+          }
+        } catch (err) {
+          clearInterval(downloadPollTimer);
+          statusEl.textContent = `상태 확인 실패: ${err.message}`;
+          statusEl.style.color = "var(--red)";
+          btn.disabled = false;
+        }
+      }, 1500);
+    }
+
+    async function downloadSelectedCheckpoint() {
+      const sel = getSelectedCheckpoint();
+      if (!sel) {
+        alert("추천 모델 또는 검색 결과에서 모델을 선택하세요.");
+        return;
+      }
+      const statusEl = document.getElementById("download-status-text");
+      statusEl.textContent = "다운로드 시작...";
+      document.getElementById("download-progress").classList.add("active");
+
+      try {
+        const result = await api("/api/models/checkpoints/download", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ version_id: sel.version_id, filename: sel.filename }),
+        });
+        await pollCheckpointDownload(result.task_id);
+      } catch (err) {
+        statusEl.textContent = err.message;
+        statusEl.style.color = "var(--red)";
+      }
+    }
+
+    function openSystemModal() {
+      document.getElementById("system-modal").classList.add("open");
+      loadSystem();
+    }
+
+    function closeSystemModal() {
+      document.getElementById("system-modal").classList.remove("open");
+    }
+
+    function openModal(tab = "text") {
+      document.getElementById("model-modal").classList.add("open");
+      switchModalTab(tab);
+      loadModalModels();
+      loadRecommendedCheckpoints();
+    }
+
+    function closeModal() {
+      document.getElementById("model-modal").classList.remove("open");
+    }
+
+    function showModalError(msg) {
+      const html = `<p class="hint" style="color:var(--red)">${msg}</p>`;
+      document.getElementById("modal-text-models").innerHTML = html;
+      document.getElementById("modal-image-models").innerHTML = html;
+    }
+
+    async function loadModalModels() {
+      const textEl = document.getElementById("modal-text-models");
+      const imgEl = document.getElementById("modal-image-models");
+      textEl.innerHTML = '<p class="hint">불러오는 중...</p>';
+      imgEl.innerHTML = '<p class="hint">불러오는 중...</p>';
+
+      try {
+        const data = await api("/api/models/manage");
+        if (data.links) modalLinks = { ...modalLinks, ...data.links };
+
+        if (!data.text.online || !data.text.models.length) {
+          textEl.innerHTML = '<p class="hint">Ollama 연결 안 됨 (SSH 터널 확인)</p>';
+        } else {
+          textEl.innerHTML = data.text.models.map(m => `
+            <div class="model-row">
+              <div class="info">
+                <div class="name">${m.name}</div>
+                <div class="size">${m.size_gb} GB</div>
+              </div>
+              <button type="button" class="with-icon" onclick="deleteModel('text','${m.name.replace(/'/g,"\\'")}')">${icon("delete")}</button>
+            </div>
+          `).join("");
+        }
+
+        document.getElementById("modal-forge-dir").textContent =
+          "폴더: " + data.image.models_dir;
+
+        if (!data.image.checkpoints.length) {
+          imgEl.innerHTML = '<p class="hint">체크포인트 없음 — DreamShaper 등 .safetensors 파일을 넣으세요</p>';
+        } else {
+          imgEl.innerHTML = data.image.checkpoints.map(m => `
+            <div class="model-row">
+              <div class="info">
+                <div class="name">${m.name}</div>
+                <div class="size">${m.size_gb} GB</div>
+              </div>
+              <button type="button" class="with-icon" onclick="deleteModel('image','${m.name.replace(/'/g,"\\'")}')">${icon("delete")}</button>
+            </div>
+          `).join("");
+        }
+      } catch (err) {
+        const hint = String(err.message).includes("Not Found")
+          ? "UI 서버가 예전 버전입니다. 터미널에서 UI를 종료(Ctrl+C) 후 <code>python run_ui.py</code>로 다시 실행하세요."
+          : `목록을 불러오지 못했습니다: ${err.message}`;
+        showModalError(hint);
+      }
+    }
+
+    async function deleteModel(type, name) {
+      const label = type === "text" ? "Ollama" : "체크포인트";
+      if (!confirm(`${label} 모델 "${name}" 을(를) 삭제할까요?`)) return;
+      await api("/api/models", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, name }),
+      });
+      await loadModalModels();
+      await loadTextModels();
+      await loadImageModels();
+    }
+
+    document.getElementById("book-type").addEventListener("change", () => {
+      const tocPath = document.getElementById("toc-file").value;
+      if (tocPath) {
+        const tocType = document.getElementById("toc-file").selectedOptions[0]?.dataset?.type;
+        if (tocType && document.getElementById("book-type").value !== tocType) {
+          document.getElementById("book-type").value = tocType;
+          return;
+        }
+      }
+      applyPipeline(null, document.getElementById("book-type").value);
+    });
+    document.getElementById("rewrite-all").addEventListener("change", syncRewriteControls);
+    document.getElementById("rewrite-parts").addEventListener("input", syncRewriteControls);
+    document.getElementById("btn-save-pipeline").addEventListener("click", savePipelineToToc);
+    document.getElementById("btn-pipeline-reset").addEventListener("click", resetPipeline);
+    document.getElementById("btn-toc-manage").addEventListener("click", openTocModal);
+    document.getElementById("toc-modal-close").addEventListener("click", closeTocModal);
+    document.getElementById("toc-modal-cancel").addEventListener("click", closeTocModal);
+    document.getElementById("toc-modal-save").addEventListener("click", saveTocModal);
+    document.getElementById("toc-add-item").addEventListener("click", addTocItem);
+    document.querySelector("#toc-modal .modal").addEventListener("click", (e) => e.stopPropagation());
+    document.getElementById("toc-modal").addEventListener("click", (e) => {
+      if (e.target.id === "toc-modal") closeTocModal();
+    });
+    document.getElementById("btn-generate-toc").addEventListener("click", generateToc);
+    document.getElementById("toc-file").addEventListener("change", syncFromTocFile);
+    document.getElementById("btn-toc-export").addEventListener("click", exportToc);
+    document.getElementById("btn-toc-import").addEventListener("click", () => {
+      document.getElementById("toc-import-input").click();
+    });
+    document.getElementById("toc-import-input").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file) return;
+      try {
+        await importToc(file);
+      } catch (err) {
+        const status = document.getElementById("toc-io-status");
+        status.textContent = err.message;
+        status.style.color = "var(--red)";
+      }
+    });
+    document.getElementById("image-backend").addEventListener("change", loadImageModels);
+    document.getElementById("btn-start").addEventListener("click", startJob);
+    document.getElementById("btn-system-info").addEventListener("click", openSystemModal);
+    document.getElementById("system-modal-close").addEventListener("click", closeSystemModal);
+    document.getElementById("btn-system-refresh").addEventListener("click", loadSystem);
+    document.querySelector("#system-modal .modal").addEventListener("click", (e) => e.stopPropagation());
+    document.getElementById("system-modal").addEventListener("click", (e) => {
+      if (e.target.id === "system-modal") closeSystemModal();
+    });
+    document.getElementById("btn-model-manage").addEventListener("click", () => openModal("text"));
+    document.getElementById("modal-close").addEventListener("click", closeModal);
+    document.getElementById("modal-refresh").addEventListener("click", loadModalModels);
+    document.querySelectorAll(".modal-tab").forEach((btn) => {
+      btn.addEventListener("click", () => switchModalTab(btn.dataset.tab));
+    });
+    document.getElementById("btn-checkpoint-search").addEventListener("click", searchCheckpoints);
+    document.getElementById("checkpoint-search").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") searchCheckpoints();
+    });
+    document.getElementById("btn-checkpoint-download").addEventListener("click", downloadSelectedCheckpoint);
+    document.getElementById("link-forge-ui").addEventListener("click", () => openExternal(modalLinks.forge_ui));
+    document.getElementById("link-civitai").addEventListener("click", () => openExternal(modalLinks.civitai));
+    document.getElementById("link-ollama-library").addEventListener("click", () => openExternal(modalLinks.ollama_library));
+    document.querySelector("#model-modal .modal").addEventListener("click", (e) => e.stopPropagation());
+    document.getElementById("model-modal").addEventListener("click", (e) => {
+      if (e.target.id === "model-modal") closeModal();
+    });
+    document.getElementById("btn-refresh-models").addEventListener("click", async () => {
+      await Promise.all([loadTextModels(), loadImageModels(), loadSystem()]);
+    });
+    document.getElementById("btn-refresh-outputs").addEventListener("click", loadOutputs);
+    document.getElementById("btn-stop").addEventListener("click", async () => {
+      if (!currentJobId) return;
+      const btn = document.getElementById("btn-stop");
+      const jobId = currentJobId;
+      btn.disabled = true;
+      const prevHtml = btn.innerHTML;
+      btn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> 중지 중...';
+      try {
+        await api(`/api/jobs/${jobId}/stop`, { method: "POST" }, 30000);
+        const job = await api(`/api/jobs/${jobId}`);
+        await refreshJobUi(job);
+      } catch (err) {
+        alert(err.message || "작업 중지에 실패했습니다.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = prevHtml;
+      }
+    });
+
+    (async () => {
+      const safe = (fn, label) => fn().catch((err) => console.warn(`[init] ${label}:`, err));
+      await Promise.all([
+        safe(loadPipelineSchema, "pipeline schema"),
+        safe(loadTocFiles, "toc files"),
+        safe(loadTextModels, "text models"),
+        safe(loadImageModels, "image models"),
+        safe(loadOutputs, "outputs"),
+      ]);
+      syncBookTypeUi();
+      ensureWorkflowVisible();
+      await safe(attachToRunningJob, "running job");
+      safe(loadSystem, "system");
+    })();
+  </script>
+</body>
+</html>

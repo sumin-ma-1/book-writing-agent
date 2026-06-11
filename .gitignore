@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+book/
+picture-book/
+.progress.json
+book-writer.log
+picture-book.log
+uv.lock
+repos/
+_ref_orchast/

@@ -1,0 +1,62 @@
+{
+  "type": "picture_book",
+  "title": "숲속의 작은 토끼",
+  "description": "용기를 배우는 유아 그림책",
+  "language": "ko",
+  "target_age": "3-5",
+  "style": "watercolor children's book illustration, soft pastel colors, warm and gentle",
+  "writing_guidelines": [
+    "Use simple, short sentences suitable for reading aloud to young children",
+    "Keep a warm, encouraging tone throughout"
+  ],
+  "characters": [
+    {
+      "name": "토끼",
+      "description": "작은 갈색 토끼, 큰 눈, 빨간 스카프를 목에 두름"
+    },
+    {
+      "name": "나비",
+      "description": "노란색과 주황색 날개의 작은 나비"
+    }
+  ],
+  "pages": [
+    {
+      "number": 1,
+      "scene": "숲 입구, 토끼가 두려워하며 서 있다",
+      "mood": "조용하고 신비로운"
+    },
+    {
+      "number": 2,
+      "scene": "나비가 토끼에게 다가와 인사한다",
+      "mood": "따뜻하고 희망적인"
+    },
+    {
+      "number": 3,
+      "scene": "토끼가 나비를 따라 숲속으로 걸어 들어간다",
+      "mood": "설레고 호기심 가득한"
+    },
+    {
+      "number": 4,
+      "scene": "숲 속 아름다운 꽃밭을 발견한다",
+      "mood": "기쁘고 놀라운"
+    },
+    {
+      "number": 5,
+      "scene": "토끼가 웃으며 집으로 돌아가는 길",
+      "mood": "행복하고 평화로운"
+    }
+  ],
+  "pipeline": {
+    "style_bible": true,
+    "storyboard": true,
+    "agents": [
+      "outline",
+      "writer",
+      "reviewer",
+      "finalizer",
+      "illustrator"
+    ],
+    "image": true,
+    "publisher": true
+  }
+}
