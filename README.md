@@ -215,6 +215,14 @@ uv sync
 
 > 🎬 영상: <img width="1296" height="1080" alt="Image" src="https://github.com/user-attachments/assets/999eef8d-5a15-4ffe-ba0b-6febd475b3fb" />
 
+**시연 3: 생성 완료된 책들 다운로드 및 관리**
+
+- 오른쪽 **출력물**: 생성 완료된 책 목록과 각 책의 결과 파일 확인
+- **PDF / Markdown / 이미지** 미리보기 및 다운로드로 생성 결과 검토
+- 불필요한 출력물은 UI로도 **삭제** 가능
+
+> 🎬 영상: <img width="1344" height="1080" alt="Image" src="https://github.com/user-attachments/assets/2ad59d5e-e0fa-444e-962e-9c1790e27ec6" />
+
 ```bash
 # 터미널 1: Ollama 터널 (원격 서버 글 생성)
 ssh -N -L 11434:localhost:11434 user@remote-host
